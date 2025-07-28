@@ -33,7 +33,7 @@ export class MailService {
     await this.transporter.sendMail({
       to,
       subject,
-      from: "Bloghub",
+      from: "Pradian",
       html: html,
     });
   };
