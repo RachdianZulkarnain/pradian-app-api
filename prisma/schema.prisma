@@ -29,6 +29,7 @@ model User {
   updatedat     DateTime        @updatedAt
   ReferralPoint ReferralPoint[]
   Coupon        Coupon[]
+  events         Event[]
 
   @@map("users")
 }
@@ -57,4 +58,25 @@ model Coupon {
   discount  Int
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  @@map("coupons")
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String   @unique
+  description String
+  location    String
+  startDate   DateTime
+  andDate     DateTime
+  adminId     Int
+  admin       User     @relation(fields: [adminId], references: [id])
+  price       Float
+  category    String
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  uopdatedAt  DateTime @updatedAt
+  slug String @unique
+
+  @@map("events")
 }
