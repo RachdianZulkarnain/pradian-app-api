@@ -18,18 +18,18 @@ model Sample {
 }
 
 model User {
-  id             Int             @id @default(autoincrement())
-  name           String
-  email          String          @unique
-  password       String
-  role           Role            @default(USER)
-  profilePicture String?
-  referralCode   String          @unique
-  referredBy     String?
-  createdAt      DateTime        @default(now())
-  updatedat      DateTime        @updatedAt
-  referralpoint  ReferralPoint[]
-  coupon         Coupon[]
+  id            Int             @id @default(autoincrement())
+  name          String
+  email         String          @unique
+  password      String
+  role          Role            @default(USER)
+  referralCode  String          @unique
+  referredBy    String?
+  createdAt     DateTime        @default(now())
+  updatedat     DateTime        @updatedAt
+  ReferralPoint ReferralPoint[]
+  Coupon        Coupon[]
+  events         Event[]
 
   @@map("users")
 }
@@ -60,4 +60,23 @@ model Coupon {
   createdAt DateTime @default(now())
 
   @@map("coupons")
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String   @unique
+  description String
+  location    String
+  startDate   DateTime
+  andDate     DateTime
+  adminId     Int
+  admin       User     @relation(fields: [adminId], references: [id])
+  price       Float
+  category    String
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  uopdatedAt  DateTime @updatedAt
+  slug String @unique
+
+  @@map("events")
 }
