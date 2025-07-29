@@ -1,6 +1,7 @@
 import {
     IsEmail,
     IsNotEmpty,
+    IsOptional,
     IsString
 } from "class-validator";
 
@@ -17,6 +18,11 @@ export class RegisterDto {
   @IsString()
   password!: string;
 
+  @IsOptional()
+  @IsString()
+  role?: string;
+
+  @IsOptional()
   @IsString()
   referralCode?: string;
 }
