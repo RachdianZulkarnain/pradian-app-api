@@ -31,7 +31,7 @@ export class JwtMiddleware {
       const user = res.locals.user;
 
       if (!user || !allowedRoles.includes(user.role)) {
-        throw new ApiError("Forbidden: insufficient role", 403);
+        throw new ApiError("Forbidden", 403);
       }
 
       next();

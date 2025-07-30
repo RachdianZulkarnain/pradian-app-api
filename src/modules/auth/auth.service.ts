@@ -61,7 +61,7 @@ export class AuthService {
       "welcome",
       { name: body.name, year: new Date().getFullYear() }
     );
-
+//
     const newUser = await this.prisma.user.create({
       data: {
         name: body.name,
