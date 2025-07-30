@@ -1,9 +1,10 @@
-import express, { Express } from "express";
 import cors from "cors";
+import express, { Express } from "express";
 import { PORT } from "./config/env";
-import { SampleRouter } from "./modules/sample/sample.router";
-import { AuthRouter } from "./modules/auth/auth.router";
 import { errorMiddleware } from "./middlewares/error.middleware";
+import { AuthRouter } from "./modules/auth/auth.router";
+import { EventRouter } from "./modules/events/event.router";
+import { SampleRouter } from "./modules/sample/sample.router";
 import { initializeScheduler } from "./scripts";
 
 export class App {
@@ -23,9 +24,11 @@ export class App {
 
   private routes() {
     const sampleRouter = new SampleRouter();
+    const eventRouter = new EventRouter();
     const authRouter = new AuthRouter();
 
     this.app.use("/samples", sampleRouter.getRouter());
+    this.app.use("/events", eventRouter.getRouter());
     this.app.use("/auth", authRouter.getRouter());
   }
 

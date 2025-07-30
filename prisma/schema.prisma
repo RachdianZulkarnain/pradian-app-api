@@ -64,20 +64,21 @@ model Coupon {
 }
 
 model Event {
-  id          Int      @id @default(autoincrement())
-  title       String   @unique
+  id          Int       @id @default(autoincrement())
+  slug        String    @unique
+  title       String    @unique
   description String
+  thumbnail   String?
   location    String
   startDate   DateTime
-  andDate     DateTime
+  endDate     DateTime
   adminId     Int
-  admin       User     @relation(fields: [adminId], references: [id])
+  admin       User      @relation(fields: [adminId], references: [id])
   price       Float
   category    String
-  imageUrl    String?
-  createdAt   DateTime @default(now())
-  uopdatedAt  DateTime @updatedAt
-  slug        String   @unique
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@map("events")
 }
