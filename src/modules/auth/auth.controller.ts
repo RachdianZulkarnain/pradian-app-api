@@ -9,12 +9,7 @@ export class AuthController {
   }
 
   register = async (req: Request, res: Response) => {
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    const pictureProfile = files.pictureProfile?.[0];
-    if (!pictureProfile) {
-      throw new ApiError("Picture is required", 400);
-    }
-    const result = await this.authService.register(req.body, pictureProfile);
+    const result = await this.authService.register(req.body);
     res.status(200).send(result);
   };
 

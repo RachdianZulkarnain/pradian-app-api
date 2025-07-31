@@ -25,7 +25,7 @@ export class AuthService {
     this.cloudinaryService = new CloudinaryService();
   }
 
-  register = async (body: RegisterDto, pictureProfile: Express.Multer.File) => {
+  register = async (body: RegisterDto) => {
     const user = await this.prisma.user.findFirst({
       where: { email: body.email },
     });
@@ -60,7 +60,6 @@ export class AuthService {
       referredBy = body.referralCode;
     }
 
-
     await this.mailService.sendMail(
       body.email,
       "Thankyou for Registering!",
@@ -68,14 +67,12 @@ export class AuthService {
       { name: body.name, year: new Date().getFullYear() }
     );
     //
-    const { secure_url } = await this.cloudinaryService.upload(pictureProfile);
 
     const newUser = await this.prisma.user.create({
       data: {
         name: body.name,
         email: body.email,
         password: hashedPassword,
-        pictureProfile: secure_url,
         referralCode,
         referredBy,
       },
