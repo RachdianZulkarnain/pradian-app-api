@@ -24,9 +24,6 @@ export class AuthRouter {
   private initializeRoutes = () => {
     this.router.post(
       "/register",
-      this.uploaderMiddleware
-        .upload()
-        .fields([{ name: "pictureProfile", maxCount: 1 }]),
       validateBody(RegisterDto),
       this.authController.register
     );
