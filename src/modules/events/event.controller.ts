@@ -16,6 +16,12 @@ export class EventController {
     res.status(200).send(result);
   };
 
+  getEventBySlug = async (req: Request, res: Response) => {
+    const slug = req.params.slug;
+    const result = await this.eventService.getEventBySlug(slug);
+    res.status(200).send(result);
+  };
+
   createEvent = async (req: Request, res: Response) => {
     const files = req.files as { [filename: string]: Express.Multer.File[] };
     const thumbnail = files.thumbnail?.[0];

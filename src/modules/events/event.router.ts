@@ -20,6 +20,7 @@ export class EventRouter {
 
   private initializedRoutes = () => {
     this.router.get("/", this.eventController.getEvents);
+    this.router.get("/:slug", this.eventController.getEventBySlug);
     this.router.post(
       "/",
       this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
