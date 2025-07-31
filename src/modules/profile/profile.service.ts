@@ -5,6 +5,7 @@ import { MailService } from "../mail/mail.service";
 import { PasswordService } from "../password/password.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { ChangePasswordDto } from "./dto/change-password.dto";
+import { UpdateProfileDto } from "./dto/update-profile.dto";
 
 export class ProfileService {
   private prisma: PrismaService;
@@ -29,7 +30,11 @@ export class ProfileService {
     return user;
   };
 
-  updateProfile = async (pictureProfile: Express.Multer.File, id: number) => {
+  updateProfile = async (
+    body: UpdateProfileDto,
+    pictureProfile: Express.Multer.File,
+    id: number
+  ) => {
     const user = await this.prisma.user.findFirst({
       where: { id },
     });
@@ -42,10 +47,10 @@ export class ProfileService {
 
     await this.prisma.user.update({
       where: { id },
-      data: { pictureProfile: secure_url },
+      data: { name: body.name, pictureProfile: secure_url },
     });
 
-    return { message: "Profile Picture Updated" };
+    return { message: "Profile Updated" };
   };
 
   changePassword = async (body: ChangePasswordDto, id: number) => {

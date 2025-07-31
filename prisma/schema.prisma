@@ -28,8 +28,8 @@ model User {
   referredBy     String?
   createdAt      DateTime        @default(now())
   updatedat      DateTime        @updatedAt
-  ReferralPoint  ReferralPoint[]
-  Coupon         Coupon[]
+  referralpoint  ReferralPoint[]
+  coupon         Coupon[]
   events         Event[]
 
   @@map("users")
