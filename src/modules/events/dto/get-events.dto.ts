@@ -5,4 +5,12 @@ export class GetEventsDTO extends PaginationQueryParams {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
 }

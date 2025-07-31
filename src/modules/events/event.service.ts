@@ -16,7 +16,7 @@ export class EventService {
   }
 
   getEvents = async (query: GetEventsDTO) => {
-    const { take, page, sortBy, sortOrder, search } = query;
+    const { take, page, sortBy, sortOrder, search, category, location } = query;
 
     const whereCluse: Prisma.EventWhereInput = {
       deletedAt: null,
@@ -25,6 +25,16 @@ export class EventService {
     if (search) {
       whereCluse.title = { contains: search, mode: "insensitive" };
     }
+
+    if (category) {
+      whereCluse.category = category;
+    }
+
+    if (location) {
+      whereCluse.location = location;
+    }
+
+
 
     const events = await this.prisma.event.findMany({
       where: whereCluse,
@@ -39,6 +49,17 @@ export class EventService {
       data: events,
       meta: { page, take, total },
     };
+  };
+
+  getEventBySlug = async (slug: string) => {
+    const event = await this.prisma.event.findFirst({
+      where: { slug },
+    });
+
+    if (!event) {
+      throw new ApiError("blog not found", 404);
+    }
+    return event;
   };
 
   createEvent = async (
@@ -66,5 +87,6 @@ export class EventService {
         slug: slug,
       },
     });
+    return { massage: "create event succes" };
   };
 }
