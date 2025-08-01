@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsNumber, IsDateString } from "class-validator";
+import { IsNotEmpty, IsString, IsDateString } from "class-validator";
 
 export class CreateEventDTO {
   @IsNotEmpty()
@@ -11,10 +11,6 @@ export class CreateEventDTO {
 
   @IsNotEmpty()
   @IsString()
-  content!: string;
-
-  @IsNotEmpty()
-  @IsString()
   category!: string;
 
   @IsNotEmpty()
@@ -23,13 +19,13 @@ export class CreateEventDTO {
 
   @IsNotEmpty()
   @IsDateString()
-  startDate!: string;
+  startDate!: string; // ISO string from frontend
 
   @IsNotEmpty()
   @IsDateString()
   endDate!: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  price!: number;
+  @IsString() // because it's sent as FormData (string)
+  price!: string;
 }
