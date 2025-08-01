@@ -34,8 +34,6 @@ export class EventService {
       whereCluse.location = location;
     }
 
-
-
     const events = await this.prisma.event.findMany({
       where: whereCluse,
       orderBy: { [sortBy]: sortOrder },
@@ -79,12 +77,31 @@ export class EventService {
 
     const { secure_url } = await this.cloudinaryService.upload(thumbnail);
 
+    // Convert string to number and dates
+    const price = Number(body.price);
+    const startDate = new Date(body.startDate);
+    const endDate = new Date(body.endDate);
+
+    if (isNaN(price)) {
+      throw new ApiError("Invalid price format", 400);
+    }
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new ApiError("Invalid date format", 400);
+    }
+
     return await this.prisma.event.create({
       data: {
-        ...body,
+        title: body.title,
+        description: body.description,
+        category: body.category,
+        location: body.location,
+        startDate,
+        endDate,
+        price,
         thumbnail: secure_url,
         adminId: autUserId,
-        slug: slug,
+        slug,
       },
     });
     return { massage: "create event succes" };
