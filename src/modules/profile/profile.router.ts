@@ -4,6 +4,7 @@ import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
 import { ProfileController } from "./profile.controller";
 import { validateBody } from "../../middlewares/validation.middleware";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 
 export class ProfileRouter {
   private router: Router;
@@ -34,6 +35,7 @@ export class ProfileRouter {
         "image/jpeg",
         "image/png",
         "image/avif",
+        "image/webp",
       ]),
       validateBody(UpdateProfileDto),
       this.profileController.updateProfile
@@ -42,6 +44,7 @@ export class ProfileRouter {
     this.router.patch(
       "/change-password",
       this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      validateBody(ChangePasswordDto),
       this.profileController.changePassword
     );
   };

@@ -31,23 +31,32 @@ export class ProfileService {
   };
 
   updateProfile = async (
+    id: number,
     body: UpdateProfileDto,
-    pictureProfile: Express.Multer.File,
-    id: number
+    pictureProfile?: Express.Multer.File
   ) => {
     const user = await this.prisma.user.findFirst({
       where: { id },
     });
 
-    if (user?.pictureProfile) {
-      await this.cloudinaryService.remove(user.pictureProfile);
-    }
+    let updatedPicture = user?.pictureProfile;
 
-    const { secure_url } = await this.cloudinaryService.upload(pictureProfile);
+    if (pictureProfile) {
+      if (user?.pictureProfile)
+        await this.cloudinaryService.remove(user.pictureProfile);
+
+      const { secure_url } = await this.cloudinaryService.upload(
+        pictureProfile
+      );
+      updatedPicture = secure_url;
+    }
 
     await this.prisma.user.update({
       where: { id },
-      data: { name: body.name, pictureProfile: secure_url },
+      data: {
+        ...body,
+        pictureProfile: updatedPicture,
+      },
     });
 
     return { message: "Profile Updated" };
