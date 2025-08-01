@@ -17,14 +17,13 @@ export class ProfileController {
   updateProfile = async (req: Request, res: Response) => {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     const pictureProfile = files.pictureProfile?.[0];
-    if (!pictureProfile) throw new ApiError("pictureProfile is required", 400);
     const authUserId = res.locals.user.id;
-    const name = req.body.name;
+    const body = req.body;
 
     const result = await this.profileService.updateProfile(
-      name,
-      pictureProfile,
-      authUserId
+      authUserId,
+      body,
+      pictureProfile
     );
     res.status(200).send(result);
   };
