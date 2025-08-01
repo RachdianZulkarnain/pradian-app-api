@@ -25,7 +25,7 @@ export class ProfileRouter {
       this.profileController.getProfile
     );
     this.router.patch(
-      "/update-profile",
+      "/edit",
       this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
       this.uploaderMiddleware
         .upload()
