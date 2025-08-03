@@ -34,4 +34,9 @@ export class EventController {
     );
     res.status(200).send(result);
   };
+
+  getShortEvents = async (req: Request, res: Response) => {
+    const result = await this.eventService.getShortEvents();
+    res.status(200).send(result);
+  };
 }

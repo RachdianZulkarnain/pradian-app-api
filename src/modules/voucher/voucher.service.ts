@@ -4,11 +4,7 @@ import { CreateVoucherDTO } from "./dto/create-voucher.dto";
 import { GetVouchersDTO } from "./dto/get-vouchers.dto";
 
 export class VoucherService {
-  private prisma: PrismaService;
-
-  constructor() {
-    this.prisma = new PrismaService();
-  }
+  private prisma = new PrismaService();
 
   getVouchers = async (query: GetVouchersDTO) => {
     const {
@@ -20,96 +16,52 @@ export class VoucherService {
       code,
     } = query;
 
-    const whereClause: any = {};
+    const where: any = {};
+    if (event) where.eventId = Number(event);
+    if (code) where.code = { contains: code, mode: "insensitive" };
 
-    if (event) {
-      whereClause.eventId = Number(event);
-    }
-
-    if (code) {
-      whereClause.code = {
-        contains: code,
-        mode: "insensitive",
-      };
-    }
-
-    const vouchers = await this.prisma.voucher.findMany({
-      where: whereClause,
+    const data = await this.prisma.voucher.findMany({
+      where,
       orderBy: { [sortBy]: sortOrder },
       skip: (Number(page) - 1) * Number(take),
       take: Number(take),
-      include: {
-        event: {
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            thumbnail: true,
-            startDate: true,
-            endDate: true,
-            location: true,
-            category: true,
-            createdAt: true,
-            updatedAt: true,
-            adminId: true,
-          },
-        },
-      },
+      include: { event: true },
     });
 
-    const total = await this.prisma.voucher.count({ where: whereClause });
+    const total = await this.prisma.voucher.count({ where });
+    return { data, meta: { page: Number(page), take: Number(take), total } };
+  };
 
-    return {
-      data: vouchers,
-      meta: {
-        page: Number(page),
-        take: Number(take),
-        total,
-      },
-    };
+  getVouchersByEvent = async (eventId: number) => {
+    return this.prisma.voucher.findMany({
+      where: { eventId },
+      orderBy: { createdAt: "desc" },
+    });
   };
 
   createVoucher = async (body: CreateVoucherDTO, userId: number) => {
-    const eventId = Number(body.event);
-    const value = Number(body.value);
-    const limit = Number(body.limit);
+    const { event, code, value, limit } = body;
+    const eventId = Number(event);
 
-    if (isNaN(eventId) || isNaN(value) || isNaN(limit)) {
+    if (isNaN(eventId) || isNaN(Number(value)) || isNaN(Number(limit))) {
       throw new ApiError("Invalid event, value, or limit format", 400);
     }
 
-    const event = await this.prisma.event.findUnique({
-      where: { id: eventId },
+    const exists = await this.prisma.voucher.findFirst({
+      where: { code, eventId },
     });
-
-    if (!event) {
-      throw new ApiError("Event not found", 404);
-    }
-
-    const existingVoucher = await this.prisma.voucher.findFirst({
-      where: {
-        code: body.code,
-        eventId,
-      },
-    });
-
-    if (existingVoucher) {
-      throw new ApiError("Voucher code already exists for this event", 409);
-    }
+    if (exists) throw new ApiError("Voucher code already exists", 409);
 
     const voucher = await this.prisma.voucher.create({
       data: {
-        code: body.code,
+        code,
         eventId,
-        value,
-        stock: limit,
+        value: Number(value),
+        stock: Number(limit),
         createdBy: userId,
       },
     });
 
-    return {
-      message: "Voucher created successfully",
-      data: voucher,
-    };
+    return { message: "Voucher created successfully", data: voucher };
   };
 }

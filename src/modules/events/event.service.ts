@@ -62,12 +62,19 @@ export class EventService {
       where: { slug },
       include: {
         tickets: true,
+        admin: {
+          select: {
+            name: true,
+            pictureProfile: true,
+          },
+        },
       },
     });
 
     if (!event) {
       throw new ApiError("event not found", 404);
     }
+
     return event;
   };
 
@@ -109,5 +116,22 @@ export class EventService {
     });
 
     return { message: "Create event success" };
+  };
+
+  getShortEvents = async () => {
+    const events = await this.prisma.event.findMany({
+      where: {
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        title: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return events;
   };
 }

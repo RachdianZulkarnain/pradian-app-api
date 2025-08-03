@@ -6,29 +6,29 @@ import { CreateVoucherDTO } from "./dto/create-voucher.dto";
 import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
 
 const uploader = new UploaderMiddleware();
+const controller = new VoucherController();
+const jwt = new JwtMiddleware();
 
 export class VoucherRouter {
-  private router: Router;
-  private voucherController: VoucherController;
-  private jwtMiddleware: JwtMiddleware;
+  private router = Router();
 
   constructor() {
-    this.router = Router();
-    this.voucherController = new VoucherController();
-    this.jwtMiddleware = new JwtMiddleware();
     this.initializeRoutes();
   }
 
-  private initializeRoutes = () => {
-    this.router.get("/", this.voucherController.getVouchers);
+  private initializeRoutes() {
+    this.router.get("/", controller.getVouchers);
+    this.router.get("/event/:eventId", controller.getVouchersByEvent);
     this.router.post(
       "/",
-      this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      jwt.verifyToken(process.env.JWT_SECRET!),
       uploader.upload().none(),
       validateBody(CreateVoucherDTO),
-      this.voucherController.createVoucher
+      controller.createVoucher
     );
-  };
+  }
 
-  getRouter = () => this.router;
+  getRouter() {
+    return this.router;
+  }
 }
