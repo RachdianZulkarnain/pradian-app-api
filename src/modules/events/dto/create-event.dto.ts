@@ -24,8 +24,4 @@ export class CreateEventDTO {
   @IsNotEmpty()
   @IsDateString()
   endDate!: string;
-
-  @IsNotEmpty()
-  @IsString() // because it's sent as FormData (string)
-  price!: string;
 }
