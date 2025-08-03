@@ -31,7 +31,8 @@ model User {
   referralpoint  ReferralPoint[]
   coupon         Coupon[]
   events         Event[]
-  Transaction    Transaction[]
+  transaction    Transaction[]
+  voucher        Voucher[]
 
   @@map("users")
 }
@@ -75,27 +76,48 @@ model Event {
   endDate     DateTime
   adminId     Int
   admin       User          @relation(fields: [adminId], references: [id])
-  price       Float
   category    String
   deletedAt   DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  Ticket      Ticket[]
-  Transaction Transaction[]
+  tickets     Ticket[]
+  transaction Transaction[]
+  voucher     Voucher[]
 
   @@map("events")
 }
 
 model Ticket {
   id                Int                 @id @default(autoincrement())
+  title             String
+  price             Float
   eventId           Int
   event             Event               @relation(fields: [eventId], references: [id])
   stock             Int
-  totalPrice        Float
+  description       String
+  totalPrice        Float               @default(0)
+  createdBy         Int
   createdAt         DateTime            @default(now())
-  TransactionDetail TransactionDetail[]
+  updatedAt         DateTime            @updatedAt
+  transactionDetail TransactionDetail[]
 
   @@map("tickets")
+}
+
+model Voucher {
+  id        Int      @id @default(autoincrement())
+  code      String
+  value     Int
+  stock     Int
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   Int
+  createdBy Int
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+
+  @@unique([code, eventId])
+  @@map("vouchers")
 }
 
 model Transaction {
@@ -112,7 +134,7 @@ model Transaction {
   pointsUsed        Int?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
-  TransactionDetail TransactionDetail[]
+  transactionDetail TransactionDetail[]
 
   @@map("transactions")
 }

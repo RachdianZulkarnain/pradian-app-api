@@ -8,20 +8,20 @@ export class JwtMiddleware {
       const token = req.headers.authorization?.split(" ")[1];
 
       if (!token) {
-        throw new ApiError("No token provided", 401);
+        return next(new ApiError("No token provided", 401));
       }
 
       verify(token, secretKey, (err, payload) => {
         if (err) {
           if (err instanceof TokenExpiredError) {
-            throw new ApiError("Token expired", 401);
+            return next(new ApiError("Token expired", 401));
           } else {
-            throw new ApiError("Invalid Token", 401);
+            return next(new ApiError("Invalid Token", 401));
           }
         }
 
         res.locals.user = payload;
-        next();
+        return next();
       });
     };
   };

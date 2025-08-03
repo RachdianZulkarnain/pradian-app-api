@@ -1,15 +1,24 @@
+import "reflect-metadata";
 import cors from "cors";
 import express, { Express } from "express";
 import { PORT } from "./config/env";
 import { errorMiddleware } from "./middlewares/error.middleware";
+
+
 import { AuthRouter } from "./modules/auth/auth.router";
 import { EventRouter } from "./modules/events/event.router";
 import { SampleRouter } from "./modules/sample/sample.router";
-import { initializeScheduler } from "./scripts";
 import { ProfileRouter } from "./modules/profile/profile.router";
+import { TransactionRouter } from "./modules/transaction/transaction.router";
+import { TicketRouter } from "./modules/tickets/ticket.router";
+import { VoucherRouter } from "./modules/voucher/voucher.router";
+
+
+import { initializeScheduler } from "./scripts";
 
 export class App {
   app: Express;
+
   constructor() {
     this.app = express();
     this.configure();
@@ -20,7 +29,8 @@ export class App {
 
   private configure() {
     this.app.use(cors());
-    this.app.use(express.json());
+    this.app.use(express.json()); 
+    this.app.use(express.urlencoded({ extended: true })); 
   }
 
   private routes() {
@@ -28,11 +38,17 @@ export class App {
     const eventRouter = new EventRouter();
     const authRouter = new AuthRouter();
     const profileRouter = new ProfileRouter();
+    const transactionRouter = new TransactionRouter();
+    const ticketRouter = new TicketRouter();
+    const voucherRouter = new VoucherRouter();
 
     this.app.use("/samples", sampleRouter.getRouter());
     this.app.use("/events", eventRouter.getRouter());
     this.app.use("/auth", authRouter.getRouter());
     this.app.use("/profile", profileRouter.getRouter());
+    this.app.use("/transaction", transactionRouter.getRouter());
+    this.app.use("/tickets", ticketRouter.getRouter());
+    this.app.use("/vouchers", voucherRouter.getRouter());
   }
 
   private handleError() {
@@ -41,7 +57,7 @@ export class App {
 
   public start() {
     this.app.listen(PORT, () => {
-      console.log(`Server running on port: ${PORT}`);
+      console.log(`🚀 Server running on port: ${PORT}`);
     });
   }
 }

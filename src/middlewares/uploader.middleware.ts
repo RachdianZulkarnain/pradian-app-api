@@ -6,15 +6,16 @@ import { NextFunction, Request, Response } from "express";
 export class UploaderMiddleware {
   upload = () => {
     const storage = multer.memoryStorage();
-
-    const limits = { fileSize: 2 * 1024 * 1024 }; // 2mb
+    const limits = { fileSize: 2 * 1024 * 1024 }; // 2MB
 
     return multer({ storage, limits });
   };
 
   fileFilter = (allowedTypes: core.MimeType[]) => {
     return async (req: Request, _res: Response, next: NextFunction) => {
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const files = req.files as {
+        [fieldname: string]: Express.Multer.File[];
+      };
 
       if (!files || Object.values(files).length === 0) {
         return next();
