@@ -4,15 +4,17 @@ import { CreateVoucherDTO } from "./dto/create-voucher.dto";
 import { GetVouchersDTO } from "./dto/get-vouchers.dto";
 
 export class VoucherController {
-  private voucherService: VoucherService;
-
-  constructor() {
-    this.voucherService = new VoucherService();
-  }
+  private voucherService = new VoucherService();
 
   getVouchers = async (req: Request, res: Response) => {
     const query = req.query as unknown as GetVouchersDTO;
     const result = await this.voucherService.getVouchers(query);
+    res.status(200).send(result);
+  };
+
+  getVouchersByEvent = async (req: Request, res: Response) => {
+    const eventId = Number(req.params.eventId);
+    const result = await this.voucherService.getVouchersByEvent(eventId);
     res.status(200).send(result);
   };
 
