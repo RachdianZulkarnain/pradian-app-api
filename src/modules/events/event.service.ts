@@ -21,6 +21,7 @@ export class EventService {
 
     const whereCluse: Prisma.EventWhereInput = {
       deletedAt: null,
+      status: "ACTIVE",
     };
 
     if (search) {

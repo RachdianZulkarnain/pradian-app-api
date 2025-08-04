@@ -1,11 +1,12 @@
-import { ApiError } from "../../utils/api-error";
-import { CloudinaryService } from "../cloudinary/cloudinary.service";
-import { PasswordService } from "../password/password.service";
-import { PrismaService } from "../prisma/prisma.service";
-import { ChangePasswordDto } from "./dto/change-password.dto";
-import { UpdateProfileDto } from "./dto/update-profile.dto";
+import { CloudinaryService } from "../modules/cloudinary/cloudinary.service";
+import { PasswordService } from "../modules/password/password.service";
+import { PrismaService } from "../modules/prisma/prisma.service";
+import { ApiError } from "../utils/api-error";
+import { ChangeDashboardPasswordDto } from "./dto/change-password-dashboard.dto";
+import { UpdateDashboardProfileDto } from "./dto/update-profile-dashboard.dto";
 
-export class ProfileService {
+
+export class SettingsService {
   private prisma: PrismaService;
   private passwordService: PasswordService;
   private cloudinaryService: CloudinaryService;
@@ -30,7 +31,7 @@ export class ProfileService {
 
   updateProfile = async (
     id: number,
-    body: UpdateProfileDto,
+    body: UpdateDashboardProfileDto,
     pictureProfile?: Express.Multer.File
   ) => {
     const user = await this.prisma.user.findFirst({
@@ -60,7 +61,7 @@ export class ProfileService {
     return { message: "Profile Updated" };
   };
 
-  changePassword = async (body: ChangePasswordDto, id: number) => {
+  changePassword = async (body: ChangeDashboardPasswordDto, id: number) => {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new ApiError("User not found", 404);
 

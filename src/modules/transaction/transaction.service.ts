@@ -19,6 +19,75 @@ export class TransactionService {
     this.cloudinaryService = new CloudinaryService();
   }
 
+    // Get all transactions for the authenticated user
+  getTransactions = async (authUserId: number) => {
+    const transactions = await this.prisma.transaction.findMany({
+      where: { userId: authUserId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        event: {
+          select: {
+            title: true,
+            thumbnail: true,
+            location: true,
+            startDate: true,
+            endDate: true,
+          },
+        },
+        transactionDetail: {
+          include: {
+            ticket: {
+              select: {
+                title: true,
+                price: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return transactions;
+  };
+
+  // Get detailed transaction by UUID (only if it belongs to the user)
+  getTransaction = async (uuid: string, authUserId: number) => {
+    const transaction = await this.prisma.transaction.findFirst({
+      where: {
+        uuid,
+        userId: authUserId,
+      },
+      include: {
+        event: {
+          select: {
+            title: true,
+            thumbnail: true,
+            location: true,
+            startDate: true,
+            endDate: true,
+          },
+        },
+        transactionDetail: {
+          include: {
+            ticket: {
+              select: {
+                title: true,
+                description: true,
+                price: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!transaction) {
+      throw new ApiError("Transaction not found or access denied", 404);
+    }
+
+    return transaction;
+  };
+
   createTransaction = async (
     body: CreateTransactionDTO,
     authUserId: number
