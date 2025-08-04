@@ -24,6 +24,7 @@ export class TransactionRouter {
     this.router.post(
       "/",
       this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.jwtMiddleware.verifyRole(["USER"]),
       validateBody(CreateTransactionDTO),
       this.transactionController.createTransaction
     );
@@ -63,7 +64,7 @@ export class TransactionRouter {
     this.router.get(
       "/:uuid",
       this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
-      this.jwtMiddleware.verifyRole(["ADMIN"]),
+      this.jwtMiddleware.verifyRole(["USER"]),
       this.transactionController.getTransaction
     );
   };
