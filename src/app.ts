@@ -46,7 +46,7 @@ export class App {
     this.app.use("/events", eventRouter.getRouter());
     this.app.use("/auth", authRouter.getRouter());
     this.app.use("/profile", profileRouter.getRouter());
-    this.app.use("/transaction", transactionRouter.getRouter());
+    this.app.use("/transactions", transactionRouter.getRouter());
     this.app.use("/tickets", ticketRouter.getRouter());
     this.app.use("/vouchers", voucherRouter.getRouter());
     this.app.use("/settings", settingsRouter.getRouter());
