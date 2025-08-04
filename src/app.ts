@@ -4,7 +4,6 @@ import express, { Express } from "express";
 import { PORT } from "./config/env";
 import { errorMiddleware } from "./middlewares/error.middleware";
 
-
 import { AuthRouter } from "./modules/auth/auth.router";
 import { EventRouter } from "./modules/events/event.router";
 import { SampleRouter } from "./modules/sample/sample.router";
@@ -13,8 +12,8 @@ import { TransactionRouter } from "./modules/transaction/transaction.router";
 import { TicketRouter } from "./modules/tickets/ticket.router";
 import { VoucherRouter } from "./modules/voucher/voucher.router";
 
-
 import { initializeScheduler } from "./scripts";
+import { SettingsRouter } from "./settings/settings.router";
 
 export class App {
   app: Express;
@@ -29,8 +28,8 @@ export class App {
 
   private configure() {
     this.app.use(cors());
-    this.app.use(express.json()); 
-    this.app.use(express.urlencoded({ extended: true })); 
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
   }
 
   private routes() {
@@ -41,6 +40,7 @@ export class App {
     const transactionRouter = new TransactionRouter();
     const ticketRouter = new TicketRouter();
     const voucherRouter = new VoucherRouter();
+    const settingsRouter = new SettingsRouter();
 
     this.app.use("/samples", sampleRouter.getRouter());
     this.app.use("/events", eventRouter.getRouter());
@@ -49,6 +49,7 @@ export class App {
     this.app.use("/transaction", transactionRouter.getRouter());
     this.app.use("/tickets", ticketRouter.getRouter());
     this.app.use("/vouchers", voucherRouter.getRouter());
+    this.app.use("/settings", settingsRouter.getRouter());
   }
 
   private handleError() {

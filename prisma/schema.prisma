@@ -43,7 +43,6 @@ enum Role {
   USER
 }
 
-
 model ReferralPoint {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id])
@@ -68,9 +67,10 @@ model Coupon {
 }
 
 model Event {
-  id          Int           @id @default(autoincrement())
-  slug        String        @unique
-  title       String        @unique
+  id    Int    @id @default(autoincrement())
+  slug  String @unique
+  title String @unique
+  status Status @default(ACTIVE)
   description String
   thumbnail   String?
   location    String
@@ -87,6 +87,11 @@ model Event {
   voucher     Voucher[]
 
   @@map("events")
+}
+
+enum Status {
+  ACTIVE
+  DRAFT
 }
 
 model Ticket {

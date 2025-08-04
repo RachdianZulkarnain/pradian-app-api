@@ -35,4 +35,15 @@ export class TransactionController {
     const result = await this.transactionService.updateTransaction(req.body);
     res.status(200).send(result);
   };
+
+  getTransactions = async (req: Request, res: Response) => {
+    const result = await this.transactionService.getTransactions(req.body);
+    res.status(200).send(result);
+  };
+
+  getTransaction = async (req: Request, res: Response) => {
+    const uuid = req.params.uuid;
+    const result = await this.transactionService.getTransaction(uuid, req.body);
+    res.status(200).send(result);
+  };
 }

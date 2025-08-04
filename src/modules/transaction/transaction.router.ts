@@ -52,6 +52,20 @@ export class TransactionRouter {
       validateBody(UpdateTransactionDTO),
       this.transactionController.updateTransaction
     );
+
+    this.router.get(
+      "/",
+      this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.jwtMiddleware.verifyRole(["ADMIN"]),
+      this.transactionController.getTransactions
+    );
+
+    this.router.get(
+      "/:uuid",
+      this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.jwtMiddleware.verifyRole(["ADMIN"]),
+      this.transactionController.getTransaction
+    );
   };
 
   getRouter = () => {
