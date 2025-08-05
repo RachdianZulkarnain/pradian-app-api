@@ -25,6 +25,7 @@ export class ProfileRouter {
       this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
       this.profileController.getProfile
     );
+
     this.router.patch(
       "/edit",
       this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
@@ -39,6 +40,23 @@ export class ProfileRouter {
       ]),
       validateBody(UpdateProfileDto),
       this.profileController.updateProfile
+    );
+
+
+    this.router.patch(
+      "/admin",
+      this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.uploaderMiddleware
+        .upload()
+        .fields([{ name: "pictureProfile", maxCount: 1 }]),
+      this.uploaderMiddleware.fileFilter([
+        "image/jpeg",
+        "image/png",
+        "image/avif",
+        "image/webp",
+      ]),
+      validateBody(UpdateProfileDto),
+      this.profileController.updateProfileAdmin
     );
 
     this.router.patch(

@@ -1,38 +1,38 @@
+// src/modules/bankDetails/bank-details.router.ts
 import { Router } from "express";
-import { TicketController } from "./ticket.controller";
+import { BankDetailsController } from "./bank-details.controller";
 import { JwtMiddleware } from "../../middlewares/jwt.middleware";
 import { validateBody } from "../../middlewares/validation.middleware";
-import { CreateTicketDTO } from "./dto/create-ticket.dto";
-import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
+import { UpsertBankDetailsDTO } from "./dto/bank-details.dto";
 
-const uploader = new UploaderMiddleware();
-
-export class TicketRouter {
+export class BankDetailsRouter {
   private router: Router;
-  private ticketController: TicketController;
+  private controller: BankDetailsController;
   private jwtMiddleware: JwtMiddleware;
 
   constructor() {
     this.router = Router();
-    this.ticketController = new TicketController();
+    this.controller = new BankDetailsController();
     this.jwtMiddleware = new JwtMiddleware();
     this.initializeRoutes();
   }
 
   private initializeRoutes = () => {
     this.router.get(
-      "/admin",
+      "/",
       this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
-      this.ticketController.getTickets
+      this.controller.getBankDetails
     );
+
     this.router.post(
       "/",
       this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
-      uploader.upload().none(),
-      validateBody(CreateTicketDTO),
-      this.ticketController.createTicket
+      validateBody(UpsertBankDetailsDTO),
+      this.controller.upsertBankDetails
     );
   };
 
-  getRouter = () => this.router;
+  getRouter = () => {
+    return this.router;
+  };
 }

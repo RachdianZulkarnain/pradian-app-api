@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { TransactionService } from "./transaction.service";
 import { ApiError } from "../../utils/api-error";
+import { plainToInstance } from "class-transformer";
+import { PaginationQueryParams } from "../pagination/dto/pagination.dto";
 
 export class TransactionController {
   private transactionService = new TransactionService();
@@ -47,24 +49,20 @@ export class TransactionController {
     }
   };
 
-  getTransactions = async (req: Request, res: Response) => {
-    try {
-      const authUserId = res.locals.user.id;
-      const page = parseInt(req.query.page as string) || 1;
-      const take = parseInt(req.query.take as string) || 5;
-      const search = (req.query.search as string) || "";
+  getAdminTransactions = async (req: Request, res: Response) => {
+    const adminId = res.locals.user?.id;
+    if (!adminId) throw new ApiError("Unauthorized", 401);
 
-      const result = await this.transactionService.getUserTransactions({
-        userId: authUserId,
-        page,
-        take,
-        search,
-      });
+    const take = parseInt(req.query.take as string) || 10;
+    const page = parseInt(req.query.page as string) || 1;
 
-      return res.status(200).json(result);
-    } catch (error) {
-      this.handleError(res, error);
-    }
+    const result = await this.transactionService.getAdminTransactions({
+      adminId,
+      take,
+      page,
+    });
+
+    res.status(200).send(result);
   };
 
   getTransaction = async (req: Request, res: Response) => {
@@ -82,6 +80,13 @@ export class TransactionController {
     } catch (error) {
       this.handleError(res, error);
     }
+  };
+
+  getAttendees = async (req: Request, res: Response) => {
+    const query = plainToInstance(PaginationQueryParams, req.query);
+    const adminId = res.locals.user?.id;
+    const result = await this.transactionService.getAttendees(query, adminId);
+    res.status(200).send(result);
   };
 
   applyVoucher = async (req: Request, res: Response) => {

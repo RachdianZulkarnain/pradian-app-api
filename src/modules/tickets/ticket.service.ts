@@ -2,6 +2,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { ApiError } from "../../utils/api-error";
 import { CreateTicketDTO } from "./dto/create-ticket.dto";
 import { GetTicketsDTO } from "./dto/get-tickets.dto";
+import { Prisma } from "../../generated/prisma";
 
 export class TicketService {
   private prisma: PrismaService;
@@ -16,19 +17,14 @@ export class TicketService {
       page = 1,
       sortBy = "createdAt",
       sortOrder = "desc",
-      event,
-      title,
+      search,
     } = query;
 
-    const whereClause: any = {};
+    const whereClause: Prisma.TicketWhereInput = {};
 
-    if (event) {
-      whereClause.eventId = Number(event);
-    }
-
-    if (title) {
+    if (search) {
       whereClause.title = {
-        contains: title,
+        contains: search,
         mode: "insensitive",
       };
     }

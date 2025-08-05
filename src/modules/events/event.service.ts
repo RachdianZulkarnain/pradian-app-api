@@ -58,6 +58,65 @@ export class EventService {
     };
   };
 
+getMyEvents = async ({
+  adminId,
+  take,
+  page,
+}: {
+  adminId: number;
+  take: number;
+  page: number;
+}) => {
+  const whereClause = {
+    deletedAt: null,
+    adminId,
+  };
+
+  const events = await this.prisma.event.findMany({
+    where: whereClause,
+    skip: (page - 1) * take,
+    take,
+    include: {
+      tickets: {
+        select: {
+          price: true,
+        },
+      },
+    },
+  });
+
+  const total = await this.prisma.event.count({ where: whereClause });
+
+  return {
+    data: events,
+    meta: {
+      page,
+      take,
+      total,
+    },
+  };
+};
+
+
+  updateEventStatus = async (
+    eventId: number,
+    status: "ACTIVE" | "DRAFT",
+    userId: number
+  ) => {
+    const event = await this.prisma.event.findFirst({
+      where: { id: eventId, adminId: userId, deletedAt: null },
+    });
+
+    if (!event) {
+      throw new ApiError("Event not found or not yours", 404);
+    }
+
+    return this.prisma.event.update({
+      where: { id: eventId },
+      data: { status },
+    });
+  };
+
   getEventBySlug = async (slug: string) => {
     const event = await this.prisma.event.findFirst({
       where: { slug },
@@ -118,6 +177,70 @@ export class EventService {
 
     return { message: "Create event success" };
   };
+
+  editEvent = async (
+  slug: string,
+  body: Partial<CreateEventDTO>, // Use Partial to allow partial updates
+  thumbnail: Express.Multer.File | undefined,
+  authUserId: number
+) => {
+  const existing = await this.prisma.event.findFirst({
+    where: { slug },
+  });
+
+  if (!existing) {
+    throw new ApiError("Event not found", 404);
+  }
+
+  if (existing.adminId !== authUserId) {
+    throw new ApiError("Unauthorized to edit this event", 403);
+  }
+
+  let newThumbnail = existing.thumbnail;
+
+  if (thumbnail) {
+    if (existing.thumbnail) {
+      await this.cloudinaryService.remove(existing.thumbnail);
+    }
+    const { secure_url } = await this.cloudinaryService.upload(thumbnail);
+    newThumbnail = secure_url;
+  }
+
+  let startDate: Date | undefined = existing.startDate;
+  let endDate: Date | undefined = existing.endDate;
+
+  if (body.startDate) {
+    const parsedStart = new Date(body.startDate);
+    if (isNaN(parsedStart.getTime())) {
+      throw new ApiError("Invalid start date format", 400);
+    }
+    startDate = parsedStart;
+  }
+
+  if (body.endDate) {
+    const parsedEnd = new Date(body.endDate);
+    if (isNaN(parsedEnd.getTime())) {
+      throw new ApiError("Invalid end date format", 400);
+    }
+    endDate = parsedEnd;
+  }
+
+  const updated = await this.prisma.event.update({
+    where: { id: existing.id },
+    data: {
+      title: body.title ?? existing.title,
+      description: body.description ?? existing.description,
+      category: body.category ?? existing.category,
+      location: body.location ?? existing.location,
+      startDate,
+      endDate,
+      thumbnail: newThumbnail,
+    },
+  });
+
+  return { message: "Event updated successfully", updated };
+};
+
 
   getShortEvents = async () => {
     const events = await this.prisma.event.findMany({
