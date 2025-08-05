@@ -25,6 +25,7 @@ model User {
   transaction     Transaction[]
   createdVouchers Voucher[]       @relation("CreatedVouchers")
   voucher         Voucher[]
+  Review          Review[]
   bankDetails      BankDetails[]
 
   @@map("users")
@@ -77,6 +78,7 @@ model Event {
   tickets     Ticket[]
   transaction Transaction[]
   voucher     Voucher[]
+  Review      Review[]
 
   @@map("events")
 }
@@ -128,6 +130,7 @@ model Transaction {
   eventId           Int
   paymentMethod     String?
   voucherId         Int?
+  total         Int
   voucher           Voucher?            @relation(fields: [voucherId], references: [id])
   event             Event               @relation(fields: [eventId], references: [id])
   uuid              String              @unique @default(uuid())
@@ -171,4 +174,20 @@ enum TransactionStatus {
   PAID
   REJECT
   EXPIRED
+}
+
+model Review {
+  id        Int       @id @default(autoincrement())
+  comment   String
+  rating    Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  userId    Int
+  eventId   Int
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("reviews")
 }

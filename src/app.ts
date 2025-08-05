@@ -23,6 +23,7 @@ export class App {
     this.app = express();
     this.configureMiddleware();
     this.routes();
+    this.routes();
     this.handleError();
     // initializeScheduler(); // Optional: Scheduled jobs
   }

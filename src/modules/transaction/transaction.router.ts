@@ -6,7 +6,6 @@ import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
 import { TransactionController } from "./transaction.controller";
 import { CreateTransactionDTO } from "./dto/create-transaction.dto";
 import { UpdateTransactionDTO } from "./dto/update-transaction.dto";
-import { uploadPaymentProofDTO } from "./dto/upload-payment-proof.dto";
 import { GetAttendeesDTO } from "./dto/get-participants.dto";
 
 export class TransactionRouter {
@@ -26,7 +25,6 @@ export class TransactionRouter {
   private initializeRoutes = () => {
     const { verifyToken, verifyRole } = this.jwtMiddleware;
 
-    // ✅ USER: Create Transaction
     this.router.post(
       "/",
       verifyToken(process.env.JWT_SECRET!),
@@ -54,7 +52,6 @@ export class TransactionRouter {
         "image/heic",
         "image/avif",
       ]),
-      validateBody(uploadPaymentProofDTO),
       this.transactionController.uploadPaymentProof
     );
 
@@ -84,13 +81,6 @@ export class TransactionRouter {
       verifyToken(process.env.JWT_SECRET!),
       verifyRole(["USER"]),
       this.transactionController.applyVoucher
-    );
-
-    this.router.post(
-      "/:uuid/pay",
-      verifyToken(process.env.JWT_SECRET!),
-      verifyRole(["USER"]),
-      this.transactionController.confirmPayment
     );
   };
 
