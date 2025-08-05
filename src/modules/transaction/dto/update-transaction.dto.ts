@@ -1,15 +1,14 @@
 import { IsEnum, IsNotEmpty, IsUUID } from "class-validator";
 
-export enum TransactionType {
+export enum UpdateType {
   ACCEPT = "ACCEPT",
   REJECT = "REJECT",
 }
+
 export class UpdateTransactionDTO {
-  @IsNotEmpty()
   @IsUUID()
   uuid!: string;
 
-  @IsNotEmpty()
-  @IsEnum(TransactionType)
-  type!: TransactionType;
+  @IsEnum(UpdateType)
+  type!: UpdateType;
 }

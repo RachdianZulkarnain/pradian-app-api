@@ -1,27 +1,25 @@
-// create-transaction.dto.ts
 import {
   IsArray,
-  ValidateNested,
   IsInt,
+  IsNotEmpty,
   IsPositive,
-  Min,
+  ValidateNested,
 } from "class-validator";
 import { Type } from "class-transformer";
 
-export class TransactionItemDTO {
+class PayloadItem {
   @IsInt()
-  @Min(1)
+  @IsPositive()
   ticketId!: number;
 
   @IsInt()
-  @Min(1)
+  @IsPositive()
   qty!: number;
 }
 
-// DTO utama untuk transaksi
 export class CreateTransactionDTO {
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => TransactionItemDTO)
-  payload!: TransactionItemDTO[];
+  @Type(() => PayloadItem)
+  payload!: PayloadItem[];
 }
