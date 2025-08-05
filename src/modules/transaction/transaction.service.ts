@@ -91,26 +91,8 @@ export class TransactionService {
         userId: authUserId,
       },
       include: {
-        event: {
-          select: {
-            title: true,
-            thumbnail: true,
-            location: true,
-            startDate: true,
-            endDate: true,
-          },
-        },
-        transactionDetail: {
-          include: {
-            ticket: {
-              select: {
-                title: true,
-                description: true,
-                price: true,
-              },
-            },
-          },
-        },
+        event: true,
+        transactionDetail: { include: { ticket: true } },
       },
     });
 
@@ -118,15 +100,14 @@ export class TransactionService {
       throw new ApiError("Transaction not found or access denied", 404);
     }
 
-    return transaction;
+    return transaction
   };
 
   createTransaction = async (
     body: CreateTransactionDTO,
     authUserId: number
   ) => {
-    const payload = body.payload; // [{ ticketId: 1, qty: 2 }, ...]
-
+    const payload = body.payload;
     const ticketIds = payload.map((item) => item.ticketId);
 
     const tickets = await this.prisma.ticket.findMany({
@@ -138,7 +119,6 @@ export class TransactionService {
       if (!ticket) {
         throw new ApiError(`Ticket with ID ${item.ticketId} not found`, 400);
       }
-
       if (ticket.stock < item.qty) {
         throw new ApiError(
           `Insufficient stock for ticket ID ${item.ticketId}`,
@@ -148,7 +128,6 @@ export class TransactionService {
     }
 
     const result = await this.prisma.$transaction(async (tx) => {
-      // Ambil eventId dari salah satu tiket (asumsi semua tiket dalam satu transaksi berasal dari event yang sama)
       const eventId = tickets[0].eventId;
 
       const transaction = await tx.transaction.create({
@@ -195,7 +174,7 @@ export class TransactionService {
       }
     );
 
-    return { message: "create transaction success" };
+    return result;
   };
 
   uploadPaymentProof = async (
@@ -203,33 +182,25 @@ export class TransactionService {
     paymentProof: Express.Multer.File,
     authUserId: number
   ) => {
-    //harus tau dulu transaksinya
-    //harus user yang punya transaksi yang bisa upload payment proof
-    //cari transaksi berdasarkan uuid
     const transaction = await this.prisma.transaction.findFirst({
-      where: { uuid: uuid },
+      where: { uuid },
     });
 
-    //kalau tidak ada throw error
-    if (!transaction) {
-      throw new ApiError("Transaction not found!", 400);
-    }
-    // kalau userId di data transaksi nya ada sesuai dengan userId didalam
-    //token, throw error
-    if (transaction.userId !== authUserId) {
-      throw new ApiError("unauthorized", 401);
-    }
+    if (!transaction) throw new ApiError("Transaction not found!", 400);
+    if (transaction.userId !== authUserId)
+      throw new ApiError("Unauthorized", 401);
 
-    //upload bukti transfer ke cloudinary
     const { secure_url } = await this.cloudinaryService.upload(paymentProof);
 
-    //update data ditable transaksi, ubah kolom paymentproof dan status
     await this.prisma.transaction.update({
       where: { uuid },
-      data: { paymentProof: secure_url, status: "WAITING_FOR_CONFIRMATION" },
+      data: {
+        paymentProof: secure_url,
+        status: "WAITING_FOR_CONFIRMATION",
+      },
     });
 
-    return { message: "Upload payment proof succes" };
+    return { message: "Upload payment proof success" };
   };
 
   updateTransaction = async (body: UpdateTransactionDTO) => {
@@ -261,11 +232,11 @@ export class TransactionService {
 
       // Return ticket stock if rejected
       if (body.type === "REJECT") {
-        const transactionDetails = await tx.transactionDetail.findMany({
+        const details = await tx.transactionDetail.findMany({
           where: { transactionId: transaction.id },
         });
 
-        for (const detail of transactionDetails) {
+        for (const detail of details) {
           await tx.ticket.update({
             where: { id: detail.ticketId },
             data: { stock: { increment: detail.qty } },
@@ -293,5 +264,148 @@ export class TransactionService {
         body.type === "ACCEPT" ? "Accept" : "Reject"
       } transaction success`,
     };
+  };
+
+  getUserTransactions = async ({
+    page,
+    take,
+    search,
+    userId,
+  }: {
+    page: number;
+    take: number;
+    search: string;
+    userId: number;
+  }) => {
+    const [transactions, total] = await Promise.all([
+      this.prisma.transaction.findMany({
+        where: {
+          userId,
+          event: {
+            title: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        },
+        skip: (page - 1) * take,
+        take,
+        orderBy: { createdAt: "desc" },
+        include: {
+          event: {
+            select: {
+              title: true,
+              location: true,
+              thumbnail: true,
+              startDate: true,
+              endDate: true,
+            },
+          },
+        },
+      }),
+      this.prisma.transaction.count({
+        where: {
+          userId,
+          event: {
+            title: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        },
+      }),
+    ]);
+
+    const formatted = transactions.map((tx) => ({
+      uuid: tx.uuid,
+      title: tx.event.title,
+      location: tx.event.location,
+      image: tx.event.thumbnail,
+      status: tx.status,
+      dateRange: `${tx.event.startDate.toLocaleDateString(
+        "id-ID"
+      )} - ${tx.event.endDate.toLocaleDateString("id-ID")}`,
+    }));
+
+    return {
+      data: formatted,
+      meta: {
+        total,
+        page,
+        take,
+      },
+    };
+  };
+
+  applyVoucher = async (
+    uuid: string,
+    code: string,
+    userId: number
+  ): Promise<{ pricing: { totalTicketPrice: number; total: number } }> => {
+    const transaction = await this.prisma.transaction.findFirst({
+      where: { uuid, userId },
+      include: {
+        transactionDetail: {
+          include: {
+            ticket: true,
+          },
+        },
+      },
+    });
+
+    if (!transaction) throw new ApiError("Transaction not found", 404);
+
+    const voucher = await this.prisma.voucher.findFirst({
+      where: { code, eventId: transaction.eventId },
+    });
+
+    if (!voucher) throw new ApiError("Voucher not found or invalid", 400);
+    if (voucher.stock <= 0) throw new ApiError("Voucher limit exceeded", 400);
+
+    const totalTicketPrice = transaction.transactionDetail.reduce(
+      (acc, detail) => acc + detail.qty * (detail.ticket.price ?? 0),
+      0
+    );
+
+    const discount = voucher.value;
+    const total = Math.max(0, totalTicketPrice - discount);
+
+    await this.prisma.transaction.update({
+      where: { uuid },
+      data: { voucherId: voucher.id },
+    });
+
+    await this.prisma.voucher.update({
+      where: { id: voucher.id },
+      data: { stock: { decrement: 1 } },
+    });
+
+    return {
+      pricing: {
+        totalTicketPrice,
+        total,
+      },
+    };
+  };
+
+  confirmPayment = async (
+    uuid: string,
+    method: string,
+    userId: number
+  ): Promise<{ message: string }> => {
+    const transaction = await this.prisma.transaction.findFirst({
+      where: { uuid, userId },
+    });
+
+    if (!transaction) throw new ApiError("Transaction not found", 404);
+
+    await this.prisma.transaction.update({
+      where: { uuid },
+      data: {
+        paymentMethod: method,
+      },
+    });
+
+    return { message: "Payment method confirmed" };
   };
 }

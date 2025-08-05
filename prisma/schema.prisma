@@ -67,10 +67,10 @@ model Coupon {
 }
 
 model Event {
-  id    Int    @id @default(autoincrement())
-  slug  String @unique
-  title String @unique
-  status Status @default(ACTIVE)
+  id          Int           @id @default(autoincrement())
+  slug        String        @unique
+  title       String        @unique
+  status      Status        @default(ACTIVE)
   description String
   thumbnail   String?
   location    String
@@ -112,29 +112,33 @@ model Ticket {
 }
 
 model Voucher {
-  id        Int      @id @default(autoincrement())
-  code      String
-  value     Int
-  stock     Int
-  event     Event    @relation(fields: [eventId], references: [id])
-  eventId   Int
-  createdBy Int
-  creator   User     @relation("CreatedVouchers", fields: [createdBy], references: [id])
-  createdAt DateTime @default(now())
-  userId    Int?
-  user      User?    @relation(fields: [userId], references: [id])
+  id          Int           @id @default(autoincrement())
+  code        String
+  value       Int
+  stock       Int
+  event       Event         @relation(fields: [eventId], references: [id])
+  eventId     Int
+  createdBy   Int
+  creator     User          @relation("CreatedVouchers", fields: [createdBy], references: [id])
+  createdAt   DateTime      @default(now())
+  userId      Int?
+  user        User?         @relation(fields: [userId], references: [id])
+  Transaction Transaction[]
 
   @@unique([code, eventId])
   @@map("vouchers")
 }
 
 model Transaction {
-  id      Int    @id @default(autoincrement())
-  userId  Int
-  user    User   @relation(fields: [userId], references: [id])
-  eventId Int
-  event   Event  @relation(fields: [eventId], references: [id])
-  uuid    String @unique @default(uuid())
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id])
+  eventId       Int
+  paymentMethod String?
+  voucherId     Int?
+  voucher       Voucher? @relation(fields: [voucherId], references: [id])
+  event         Event    @relation(fields: [eventId], references: [id])
+  uuid          String   @unique @default(uuid())
 
   status            TransactionStatus   @default(WAITING_FOR_PAYMENT)
   paymentProof      String?
@@ -156,7 +160,7 @@ model TransactionDetail {
   qty           Int
   price         Int
   createdAt     DateTime    @default(now())
-  updateAt      DateTime    @updatedAt
+  updatedAt      DateTime    @updatedAt
 
   @@map("transaction_details")
 }
@@ -168,3 +172,4 @@ enum TransactionStatus {
   REJECT
   EXPIRED
 }
+

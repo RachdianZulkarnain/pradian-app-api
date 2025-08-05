@@ -1,9 +1,11 @@
 import "reflect-metadata";
-import cors from "cors";
 import express, { Express } from "express";
+import cors from "cors";
+
 import { PORT } from "./config/env";
 import { errorMiddleware } from "./middlewares/error.middleware";
 
+// Routers
 import { AuthRouter } from "./modules/auth/auth.router";
 import { EventRouter } from "./modules/events/event.router";
 import { SampleRouter } from "./modules/sample/sample.router";
@@ -11,23 +13,21 @@ import { ProfileRouter } from "./modules/profile/profile.router";
 import { TransactionRouter } from "./modules/transaction/transaction.router";
 import { TicketRouter } from "./modules/tickets/ticket.router";
 import { VoucherRouter } from "./modules/voucher/voucher.router";
-
-import { initializeScheduler } from "./scripts";
 import { SettingsRouter } from "./settings/settings.router";
 import { AnalyticsRouter } from "./modules/analytics/analytics.router";
 
 export class App {
-  app: Express;
+  public app: Express;
 
   constructor() {
     this.app = express();
-    this.configure();
-    this.routes();
+    this.configureMiddleware();
+    this.configureRoutes();
     this.handleError();
-    initializeScheduler();
+    initializeScheduler(); // Optional: Scheduled jobs
   }
 
-  private configure() {
+  private configureMiddleware() {
     this.app.use(cors());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
@@ -56,12 +56,17 @@ export class App {
   }
 
   private handleError() {
-    this.app.use(errorMiddleware);
+    this.app.use(errorMiddleware); // Global error handler
   }
 
   public start() {
+    if (!PORT) {
+      console.error("❌ PORT is not defined in environment variables.");
+      process.exit(1);
+    }
+
     this.app.listen(PORT, () => {
-      console.log(`🚀 Server running on port: ${PORT}`);
+      console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
   }
 }
