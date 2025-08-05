@@ -6,6 +6,7 @@ import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
 import { TransactionController } from "./transaction.controller";
 import { CreateTransactionDTO } from "./dto/create-transaction.dto";
 import { UpdateTransactionDTO } from "./dto/update-transaction.dto";
+import { GetAttendeesDTO } from "./dto/get-participants.dto";
 
 export class TransactionRouter {
   private router: Router;
@@ -30,6 +31,12 @@ export class TransactionRouter {
       verifyRole(["USER"]),
       validateBody(CreateTransactionDTO),
       this.transactionController.createTransaction
+    );
+
+    this.router.get(
+      "/attendees",
+      this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.transactionController.getAttendees
     );
 
     this.router.patch(
@@ -57,10 +64,9 @@ export class TransactionRouter {
     );
 
     this.router.get(
-      "/",
-      verifyToken(process.env.JWT_SECRET!),
-      verifyRole(["USER", "ADMIN"]),
-      this.transactionController.getTransactions
+      "/admin",
+      this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.transactionController.getAdminTransactions
     );
 
     this.router.get(

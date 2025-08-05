@@ -24,7 +24,35 @@ export class EventRouter {
 
     this.router.get("/", this.eventController.getEvents);
 
+    this.router.patch(
+      "/",
+      this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.eventController.updateEventStatus
+    );
+
+    this.router.get(
+      "/admin",
+      this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.eventController.getMyEvents
+    );
+
     this.router.get("/:slug", this.eventController.getEventBySlug);
+
+    this.router.patch(
+      "/:slug/edit",
+      this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.uploaderMiddleware
+        .upload()
+        .fields([{ name: "thumbnail", maxCount: 1 }]),
+      this.uploaderMiddleware.fileFilter([
+        "image/jpeg",
+        "image/png",
+        "image/avif",
+        "image/webp",
+      ]),
+      validateBody(CreateEventDTO), // if you have a DTO validator for editing
+      this.eventController.editEvent
+    );
 
     this.router.post(
       "/",
