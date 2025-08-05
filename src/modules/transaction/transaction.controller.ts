@@ -25,11 +25,10 @@ export class TransactionController {
       if (!paymentProof) throw new ApiError("paymentProof is required", 400);
 
       const authUserId = res.locals.user.id;
-      const { uuid } = req.body;
-      if (!uuid) throw new ApiError("UUID is required", 400);
+     
 
       const result = await this.transactionService.uploadPaymentProof(
-        uuid,
+        req.params.uuid,
         paymentProof,
         authUserId
       );
@@ -87,11 +86,11 @@ export class TransactionController {
 
   applyVoucher = async (req: Request, res: Response) => {
     try {
-      const authUserId = res.locals.user.id;
       const { uuid, code } = req.body;
+      const authUserId = res.locals.user.id;
 
       if (!uuid || !code) {
-        throw new ApiError("UUID and voucher code are required", 400);
+        return res.status(400).json({ message: "UUID and code are required" });
       }
 
       const result = await this.transactionService.applyVoucher(
@@ -99,9 +98,12 @@ export class TransactionController {
         code,
         authUserId
       );
+
       return res.status(200).json(result);
-    } catch (error) {
-      this.handleError(res, error);
+    } catch (error: any) {
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message });
     }
   };
 
