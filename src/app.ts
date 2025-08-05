@@ -24,7 +24,7 @@ export class App {
   constructor() {
     this.app = express();
     this.configureMiddleware();
-    this.configureRoutes();
+    this.routes();
     this.handleError();
     initializeScheduler(); // Optional: Scheduled jobs
   }
@@ -35,7 +35,7 @@ export class App {
     this.app.use(express.urlencoded({ extended: true }));
   }
 
-  private configureRoutes() {
+  private routes() {
     this.app.use("/samples", new SampleRouter().getRouter());
     this.app.use("/events", new EventRouter().getRouter());
     this.app.use("/auth", new AuthRouter().getRouter());

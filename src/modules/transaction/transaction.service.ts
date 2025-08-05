@@ -28,7 +28,7 @@ export class TransactionService {
       throw new ApiError("Transaction not found or access denied", 404);
     }
 
-    return transaction
+    return transaction;
   };
 
   createTransaction = async (
@@ -57,11 +57,17 @@ export class TransactionService {
 
     const result = await this.prisma.$transaction(async (tx) => {
       const eventId = tickets[0].eventId;
+      const total = payload.reduce((acc, item) => {
+        const ticket = tickets.find((t) => t.id === item.ticketId);
+        if (!ticket) throw new Error(`Ticket ID ${item.ticketId} not found`);
+        return acc + item.qty * ticket.price;
+      }, 0);
 
       const transaction = await tx.transaction.create({
         data: {
           userId: authUserId,
           eventId,
+          total,
         },
         include: { user: true },
       });
@@ -72,7 +78,7 @@ export class TransactionService {
           transactionId: transaction.id,
           ticketId: item.ticketId,
           qty: item.qty,
-          price: Math.floor(ticket.totalPrice),
+          price: ticket.price,
         };
       });
 
@@ -253,11 +259,7 @@ export class TransactionService {
     const transaction = await this.prisma.transaction.findFirst({
       where: { uuid, userId },
       include: {
-        transactionDetail: {
-          include: {
-            ticket: true,
-          },
-        },
+        transactionDetail: { include: { ticket: true } },
       },
     });
 
@@ -271,7 +273,7 @@ export class TransactionService {
     if (voucher.stock <= 0) throw new ApiError("Voucher limit exceeded", 400);
 
     const totalTicketPrice = transaction.transactionDetail.reduce(
-      (acc, detail) => acc + detail.qty * (detail.ticket.price ?? 0),
+      (acc, detail) => acc + detail.qty * detail.ticket.price,
       0
     );
 
