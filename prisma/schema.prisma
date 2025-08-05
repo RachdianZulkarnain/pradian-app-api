@@ -8,15 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Sample {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("samples")
-}
-
 model User {
   id              Int             @id @default(autoincrement())
   name            String
@@ -34,6 +25,7 @@ model User {
   transaction     Transaction[]
   createdVouchers Voucher[]       @relation("CreatedVouchers")
   voucher         Voucher[]
+  bankDetails      BankDetails[]
 
   @@map("users")
 }
@@ -130,16 +122,15 @@ model Voucher {
 }
 
 model Transaction {
-  id            Int      @id @default(autoincrement())
-  userId        Int
-  user          User     @relation(fields: [userId], references: [id])
-  eventId       Int
-  paymentMethod String?
-  voucherId     Int?
-  voucher       Voucher? @relation(fields: [voucherId], references: [id])
-  event         Event    @relation(fields: [eventId], references: [id])
-  uuid          String   @unique @default(uuid())
-
+  id                Int                 @id @default(autoincrement())
+  userId            Int
+  user              User                @relation(fields: [userId], references: [id])
+  eventId           Int
+  paymentMethod     String?
+  voucherId         Int?
+  voucher           Voucher?            @relation(fields: [voucherId], references: [id])
+  event             Event               @relation(fields: [eventId], references: [id])
+  uuid              String              @unique @default(uuid())
   status            TransactionStatus   @default(WAITING_FOR_PAYMENT)
   paymentProof      String?
   couponUsed        String?
@@ -160,9 +151,18 @@ model TransactionDetail {
   qty           Int
   price         Int
   createdAt     DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  updatedAt     DateTime    @updatedAt
 
   @@map("transaction_details")
+}
+
+model BankDetails {
+  id            Int    @id @default(autoincrement())
+  bankName      String
+  accountName   String
+  accountNumber String
+  userId        Int
+  user          User   @relation(fields: [userId], references: [id])
 }
 
 enum TransactionStatus {
@@ -172,4 +172,3 @@ enum TransactionStatus {
   REJECT
   EXPIRED
 }
-

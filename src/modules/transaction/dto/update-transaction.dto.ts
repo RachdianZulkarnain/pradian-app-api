@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsUUID } from "class-validator";
+import { IsEnum, IsUUID } from "class-validator";
 
 export enum UpdateType {
   ACCEPT = "ACCEPT",

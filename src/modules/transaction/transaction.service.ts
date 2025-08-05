@@ -1,8 +1,10 @@
+import { Prisma } from "../../generated/prisma";
 import { ApiError } from "../../utils/api-error";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
 import { MailService } from "../mail/mail.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateTransactionDTO } from "./dto/create-transaction.dto";
+import { GetAttendeesDTO } from "./dto/get-participants.dto";
 import { UpdateTransactionDTO } from "./dto/update-transaction.dto";
 import { TransactionQueue } from "./transaction.queue";
 
@@ -100,7 +102,7 @@ export class TransactionService {
       throw new ApiError("Transaction not found or access denied", 404);
     }
 
-    return transaction
+    return transaction;
   };
 
   createTransaction = async (
@@ -407,5 +409,54 @@ export class TransactionService {
     });
 
     return { message: "Payment method confirmed" };
+  };
+
+  getAttendees = async (query: GetAttendeesDTO, adminId: number) => {
+    const { take, page, sortBy, sortOrder, search } = query;
+
+    const whereClause: Prisma.TransactionWhereInput = {
+      event: {
+        adminId,
+        deletedAt: null,
+      },
+      status: "PAID",
+      ...(search && {
+        user: {
+          name: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      }),
+    };
+
+    const transactions = await this.prisma.transaction.findMany({
+      where: whereClause,
+      orderBy: { [sortBy]: sortOrder },
+      skip: (page - 1) * take,
+      take,
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        event: { select: { title: true } },
+        transactionDetail: {
+          include: {
+            ticket: { select: { title: true } },
+          },
+        },
+      },
+    });
+
+    const total = await this.prisma.transaction.count({
+      where: whereClause,
+    });
+
+    return {
+      data: transactions,
+      meta: {
+        page,
+        take,
+        total,
+      },
+    };
   };
 }

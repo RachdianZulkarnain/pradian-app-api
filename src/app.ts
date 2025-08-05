@@ -5,16 +5,16 @@ import cors from "cors";
 import { PORT } from "./config/env";
 import { errorMiddleware } from "./middlewares/error.middleware";
 
-// Routers
 import { AuthRouter } from "./modules/auth/auth.router";
 import { EventRouter } from "./modules/events/event.router";
-import { SampleRouter } from "./modules/sample/sample.router";
 import { ProfileRouter } from "./modules/profile/profile.router";
 import { TransactionRouter } from "./modules/transaction/transaction.router";
 import { TicketRouter } from "./modules/tickets/ticket.router";
 import { VoucherRouter } from "./modules/voucher/voucher.router";
 import { SettingsRouter } from "./settings/settings.router";
 import { AnalyticsRouter } from "./modules/analytics/analytics.router";
+import { initializeScheduler } from "./scripts";
+import { BankDetailsRouter } from "./modules/bank-details/bank-details.router";
 
 export class App {
   public app: Express;
@@ -22,9 +22,9 @@ export class App {
   constructor() {
     this.app = express();
     this.configureMiddleware();
-    this.configureRoutes();
+    this.routes();
     this.handleError();
-    initializeScheduler(); // Optional: Scheduled jobs
+    // initializeScheduler(); // Optional: Scheduled jobs
   }
 
   private configureMiddleware() {
@@ -34,7 +34,6 @@ export class App {
   }
 
   private routes() {
-    const sampleRouter = new SampleRouter();
     const eventRouter = new EventRouter();
     const authRouter = new AuthRouter();
     const profileRouter = new ProfileRouter();
@@ -42,9 +41,9 @@ export class App {
     const ticketRouter = new TicketRouter();
     const voucherRouter = new VoucherRouter();
     const settingsRouter = new SettingsRouter();
+    const bankDetailsRouter = new BankDetailsRouter();
     const analyticsRouter = new AnalyticsRouter();
 
-    this.app.use("/samples", sampleRouter.getRouter());
     this.app.use("/events", eventRouter.getRouter());
     this.app.use("/auth", authRouter.getRouter());
     this.app.use("/profile", profileRouter.getRouter());
@@ -53,6 +52,7 @@ export class App {
     this.app.use("/tickets", ticketRouter.getRouter());
     this.app.use("/vouchers", voucherRouter.getRouter());
     this.app.use("/settings", settingsRouter.getRouter());
+    this.app.use("/bank-details", bankDetailsRouter.getRouter());
   }
 
   private handleError() {

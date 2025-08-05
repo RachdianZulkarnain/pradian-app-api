@@ -65,6 +65,25 @@ export class EventController {
     res.status(200).send(result);
   };
 
+  editEvent = async (req: Request, res: Response) => {
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+  const thumbnail = files?.thumbnail?.[0]; // optional in edit
+
+  const { slug } = req.params;
+  const body = req.body;
+  const userId = res.locals.user.id;
+
+  const result = await this.eventService.editEvent(
+    slug,
+    body,
+    thumbnail,
+    userId
+  );
+
+  res.status(200).send(result);
+};
+
+
   getShortEvents = async (req: Request, res: Response) => {
     const result = await this.eventService.getShortEvents();
     res.status(200).send(result);

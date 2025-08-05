@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { TransactionService } from "./transaction.service";
 import { ApiError } from "../../utils/api-error";
+import { plainToInstance } from "class-transformer";
+import { PaginationQueryParams } from "../pagination/dto/pagination.dto";
 
 export class TransactionController {
   private transactionService = new TransactionService();
@@ -79,6 +81,13 @@ export class TransactionController {
     } catch (error) {
       this.handleError(res, error);
     }
+  };
+
+  getAttendees = async (req: Request, res: Response) => {
+    const query = plainToInstance(PaginationQueryParams, req.query);
+    const adminId = res.locals.user?.id;
+    const result = await this.transactionService.getAttendees(query, adminId);
+    res.status(200).send(result);
   };
 
   applyVoucher = async (req: Request, res: Response) => {

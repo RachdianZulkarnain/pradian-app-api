@@ -7,6 +7,7 @@ import { TransactionController } from "./transaction.controller";
 import { CreateTransactionDTO } from "./dto/create-transaction.dto";
 import { UpdateTransactionDTO } from "./dto/update-transaction.dto";
 import { uploadPaymentProofDTO } from "./dto/upload-payment-proof.dto";
+import { GetAttendeesDTO } from "./dto/get-participants.dto";
 
 export class TransactionRouter {
   private router: Router;
@@ -34,6 +35,12 @@ export class TransactionRouter {
       this.transactionController.createTransaction
     );
 
+    this.router.get(
+      "/attendees",
+      this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.transactionController.getAttendees
+    );
+
     this.router.patch(
       "/:uuid/upload-proof",
       verifyToken(process.env.JWT_SECRET!),
@@ -51,7 +58,6 @@ export class TransactionRouter {
       this.transactionController.uploadPaymentProof
     );
 
-    
     this.router.patch(
       "/",
       verifyToken(process.env.JWT_SECRET!),
