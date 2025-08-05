@@ -36,8 +36,19 @@ export class TransactionController {
     res.status(200).send(result);
   };
 
-  getTransactions = async (req: Request, res: Response) => {
-    const result = await this.transactionService.getTransactions(req.body);
+  getAdminTransactions = async (req: Request, res: Response) => {
+    const adminId = res.locals.user?.id;
+    if (!adminId) throw new ApiError("Unauthorized", 401);
+
+    const take = parseInt(req.query.take as string) || 10;
+    const page = parseInt(req.query.page as string) || 1;
+
+    const result = await this.transactionService.getAdminTransactions({
+      adminId,
+      take,
+      page,
+    });
+
     res.status(200).send(result);
   };
 

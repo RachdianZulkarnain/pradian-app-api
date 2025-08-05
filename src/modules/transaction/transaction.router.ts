@@ -54,10 +54,9 @@ export class TransactionRouter {
     );
 
     this.router.get(
-      "/",
+      "/admin",
       this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
-      this.jwtMiddleware.verifyRole(["ADMIN"]),
-      this.transactionController.getTransactions
+      this.transactionController.getAdminTransactions
     );
 
     this.router.get(

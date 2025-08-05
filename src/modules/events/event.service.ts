@@ -58,6 +58,65 @@ export class EventService {
     };
   };
 
+getMyEvents = async ({
+  adminId,
+  take,
+  page,
+}: {
+  adminId: number;
+  take: number;
+  page: number;
+}) => {
+  const whereClause = {
+    deletedAt: null,
+    adminId,
+  };
+
+  const events = await this.prisma.event.findMany({
+    where: whereClause,
+    skip: (page - 1) * take,
+    take,
+    include: {
+      tickets: {
+        select: {
+          price: true,
+        },
+      },
+    },
+  });
+
+  const total = await this.prisma.event.count({ where: whereClause });
+
+  return {
+    data: events,
+    meta: {
+      page,
+      take,
+      total,
+    },
+  };
+};
+
+
+  updateEventStatus = async (
+    eventId: number,
+    status: "ACTIVE" | "DRAFT",
+    userId: number
+  ) => {
+    const event = await this.prisma.event.findFirst({
+      where: { id: eventId, adminId: userId, deletedAt: null },
+    });
+
+    if (!event) {
+      throw new ApiError("Event not found or not yours", 404);
+    }
+
+    return this.prisma.event.update({
+      where: { id: eventId },
+      data: { status },
+    });
+  };
+
   getEventBySlug = async (slug: string) => {
     const event = await this.prisma.event.findFirst({
       where: { slug },

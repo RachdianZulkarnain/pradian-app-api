@@ -5,7 +5,7 @@ import { validateBody } from "../../middlewares/validation.middleware";
 import { CreateTicketDTO } from "./dto/create-ticket.dto";
 import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
 
-const uploader = new UploaderMiddleware(); 
+const uploader = new UploaderMiddleware();
 
 export class TicketRouter {
   private router: Router;
@@ -20,7 +20,11 @@ export class TicketRouter {
   }
 
   private initializeRoutes = () => {
-    this.router.get("/", this.ticketController.getTickets);
+    this.router.get(
+      "/admin",
+      this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.ticketController.getTickets
+    );
     this.router.post(
       "/",
       this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),

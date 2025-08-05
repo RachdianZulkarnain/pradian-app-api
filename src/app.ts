@@ -14,6 +14,7 @@ import { VoucherRouter } from "./modules/voucher/voucher.router";
 
 import { initializeScheduler } from "./scripts";
 import { SettingsRouter } from "./settings/settings.router";
+import { AnalyticsRouter } from "./modules/analytics/analytics.router";
 
 export class App {
   app: Express;
@@ -41,12 +42,14 @@ export class App {
     const ticketRouter = new TicketRouter();
     const voucherRouter = new VoucherRouter();
     const settingsRouter = new SettingsRouter();
+    const analyticsRouter = new AnalyticsRouter();
 
     this.app.use("/samples", sampleRouter.getRouter());
     this.app.use("/events", eventRouter.getRouter());
     this.app.use("/auth", authRouter.getRouter());
     this.app.use("/profile", profileRouter.getRouter());
-    this.app.use("/transaction", transactionRouter.getRouter());
+    this.app.use("/analytics", analyticsRouter.getRouter());
+    this.app.use("/transactions", transactionRouter.getRouter());
     this.app.use("/tickets", ticketRouter.getRouter());
     this.app.use("/vouchers", voucherRouter.getRouter());
     this.app.use("/settings", settingsRouter.getRouter());

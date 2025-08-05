@@ -19,35 +19,68 @@ export class TransactionService {
     this.cloudinaryService = new CloudinaryService();
   }
 
-    // Get all transactions for the authenticated user
-  getTransactions = async (authUserId: number) => {
-    const transactions = await this.prisma.transaction.findMany({
-      where: { userId: authUserId },
-      orderBy: { createdAt: "desc" },
-      include: {
-        event: {
-          select: {
-            title: true,
-            thumbnail: true,
-            location: true,
-            startDate: true,
-            endDate: true,
-          },
-        },
-        transactionDetail: {
-          include: {
-            ticket: {
-              select: {
-                title: true,
-                price: true,
-              },
-            },
-          },
-        },
+  // Get all transactions for the authenticated user
+  getAdminTransactions = async ({
+    adminId,
+    take,
+    page,
+  }: {
+    adminId: number;
+    take: number;
+    page: number;
+  }) => {
+    const whereClause = {
+      event: {
+        adminId,
+        deletedAt: null,
       },
+    };
+
+    const [transactions, total] = await this.prisma.$transaction([
+      this.prisma.transaction.findMany({
+        where: whereClause,
+        include: {
+          user: true,
+          event: true,
+          transactionDetail: true,
+        },
+        skip: (page - 1) * take,
+        take,
+        orderBy: { createdAt: "desc" },
+      }),
+      this.prisma.transaction.count({ where: whereClause }),
+    ]);
+
+    const data = transactions.map((tx) => {
+      const quantity = tx.transactionDetail.reduce((sum, d) => sum + d.qty, 0);
+      const totalTicketPrice = tx.transactionDetail.reduce(
+        (sum, d) => sum + d.qty * d.price,
+        0
+      );
+      const finalPrice = totalTicketPrice - (tx.pointsUsed || 0);
+
+      return {
+        uuid: tx.uuid,
+        eventName: tx.event.title,
+        Email: tx.user.email,
+        quantity,
+        totalTicketPrice,
+        voucherUsed: tx.couponUsed,
+        pointsUsed: tx.pointsUsed,
+        finalPrice,
+        status: tx.status,
+        paymentProof: tx.paymentProof,
+      };
     });
 
-    return transactions;
+    return {
+      data,
+      meta: {
+        page,
+        take,
+        total,
+      },
+    };
   };
 
   // Get detailed transaction by UUID (only if it belongs to the user)
@@ -202,9 +235,9 @@ export class TransactionService {
   updateTransaction = async (body: UpdateTransactionDTO) => {
     const transaction = await this.prisma.transaction.findFirst({
       where: { uuid: body.uuid },
+      include: { user: true }, // ✅ include user details for email
     });
 
-    // 1. Validasi transaksi
     if (!transaction) {
       throw new ApiError("Transaction not found!", 404);
     }
@@ -217,7 +250,7 @@ export class TransactionService {
     }
 
     await this.prisma.$transaction(async (tx) => {
-      // 2. Update status transaksi
+      // Update status
       await tx.transaction.update({
         where: { uuid: body.uuid },
         data: {
@@ -226,7 +259,7 @@ export class TransactionService {
         },
       });
 
-      // 3. Jika ditolak, kembalikan stok tiket
+      // Return ticket stock if rejected
       if (body.type === "REJECT") {
         const transactionDetails = await tx.transactionDetail.findMany({
           where: { transactionId: transaction.id },
@@ -239,6 +272,20 @@ export class TransactionService {
           });
         }
       }
+    });
+
+    // ✅ Send email to the user
+    const template =
+      body.type === "ACCEPT" ? "transaction-accepted" : "transaction-rejected";
+    const subject =
+      body.type === "ACCEPT"
+        ? "Your transaction has been accepted!"
+        : "Your transaction has been rejected";
+
+    await this.mailService.sendMail(transaction.user.email, subject, template, {
+      name: transaction.user.name,
+      transactionCode: transaction.uuid,
+      year: new Date().getFullYear(),
     });
 
     return {

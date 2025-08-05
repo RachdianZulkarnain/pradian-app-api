@@ -11,13 +11,19 @@ const jwt = new JwtMiddleware();
 
 export class VoucherRouter {
   private router = Router();
+  private jwtService: JwtMiddleware;
 
   constructor() {
+    this.jwtService = new JwtMiddleware();
     this.initializeRoutes();
   }
 
   private initializeRoutes() {
-    this.router.get("/", controller.getVouchers);
+    this.router.get(
+      "/admin",
+      this.jwtService.verifyToken(process.env.JWT_SECRET!),
+      controller.getVouchers
+    );
     this.router.get("/event/:eventId", controller.getVouchersByEvent);
     this.router.post(
       "/",
