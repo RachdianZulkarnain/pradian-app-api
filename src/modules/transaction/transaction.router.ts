@@ -70,6 +70,12 @@ export class TransactionRouter {
     );
 
     this.router.get(
+      "/user",
+      this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.transactionController.getUserTransactions
+    );
+
+    this.router.get(
       "/:uuid",
       verifyToken(process.env.JWT_SECRET!),
       verifyRole(["USER"]),

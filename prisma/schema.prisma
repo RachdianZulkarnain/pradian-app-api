@@ -25,8 +25,8 @@ model User {
   transaction     Transaction[]
   createdVouchers Voucher[]       @relation("CreatedVouchers")
   voucher         Voucher[]
-  Review          Review[]
-  bankDetails      BankDetails[]
+  reviews          Review[]
+  bankDetails     BankDetails[]
 
   @@map("users")
 }
@@ -78,7 +78,7 @@ model Event {
   tickets     Ticket[]
   transaction Transaction[]
   voucher     Voucher[]
-  Review      Review[]
+  reviews      Review[]
 
   @@map("events")
 }
@@ -130,7 +130,7 @@ model Transaction {
   eventId           Int
   paymentMethod     String?
   voucherId         Int?
-  total         Int
+  total             Int
   voucher           Voucher?            @relation(fields: [voucherId], references: [id])
   event             Event               @relation(fields: [eventId], references: [id])
   uuid              String              @unique @default(uuid())
