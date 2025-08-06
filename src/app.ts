@@ -15,6 +15,7 @@ import { SettingsRouter } from "./settings/settings.router";
 import { AnalyticsRouter } from "./modules/analytics/analytics.router";
 import { initializeScheduler } from "./scripts";
 import { BankDetailsRouter } from "./modules/bank-details/bank-details.router";
+import { ReviewRouter } from "./modules/reviews/review.router";
 
 export class App {
   public app: Express;
@@ -22,7 +23,6 @@ export class App {
   constructor() {
     this.app = express();
     this.configureMiddleware();
-    this.routes();
     this.routes();
     this.handleError();
     // initializeScheduler(); // Optional: Scheduled jobs
@@ -44,6 +44,8 @@ export class App {
     const settingsRouter = new SettingsRouter();
     const bankDetailsRouter = new BankDetailsRouter();
     const analyticsRouter = new AnalyticsRouter();
+    const reviewRouter = new ReviewRouter();
+    
 
     this.app.use("/events", eventRouter.getRouter());
     this.app.use("/auth", authRouter.getRouter());
@@ -54,6 +56,7 @@ export class App {
     this.app.use("/vouchers", voucherRouter.getRouter());
     this.app.use("/settings", settingsRouter.getRouter());
     this.app.use("/bank-details", bankDetailsRouter.getRouter());
+    this.app.use("/reviews", reviewRouter.getRouter());
   }
 
   private handleError() {
