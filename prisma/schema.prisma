@@ -15,7 +15,7 @@ model User {
   password        String
   role            Role            @default(USER)
   pictureProfile  String?
-  referralCode    String          @unique
+  referralCode    String?          @unique
   referredBy      String?
   createdAt       DateTime        @default(now())
   updatedat       DateTime        @updatedAt

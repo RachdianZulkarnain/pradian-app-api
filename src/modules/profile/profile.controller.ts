@@ -29,19 +29,19 @@ export class ProfileController {
   };
 
   updateProfileAdmin = async (req: Request, res: Response) => {
-  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-  const pictureProfile = files.pictureProfile?.[0];
-  const authUserId = res.locals.user.id;
-  const body = req.body;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const pictureProfile = files.pictureProfile?.[0];
+    const authUserId = res.locals.user.id;
+    const body = req.body;
 
-  const result = await this.profileService.updateProfileAdmin(
-    authUserId,
-    body,
-    pictureProfile
-  );
+    const result = await this.profileService.updateProfileAdmin(
+      authUserId,
+      body,
+      pictureProfile
+    );
 
-  res.status(200).send(result);
-};
+    res.status(200).send(result);
+  };
 
   changePassword = async (req: Request, res: Response) => {
     const authUserId = res.locals.user.id;

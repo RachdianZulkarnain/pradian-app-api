@@ -24,7 +24,9 @@ export class VoucherRouter {
       this.jwtService.verifyToken(process.env.JWT_SECRET!),
       controller.getVouchers
     );
+
     this.router.get("/event/:eventId", controller.getVouchersByEvent);
+    
     this.router.post(
       "/",
       jwt.verifyToken(process.env.JWT_SECRET!),

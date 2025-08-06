@@ -7,6 +7,7 @@ import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { JwtMiddleware } from "../../middlewares/jwt.middleware";
+import { RegisterAdminDto } from "./dto/register-admin.dto";
 
 export class AuthRouter {
   private authController: AuthController;
@@ -26,6 +27,11 @@ export class AuthRouter {
       "/register",
       validateBody(RegisterDto),
       this.authController.register
+    );
+    this.router.post(
+      "/register/admin",
+      validateBody(RegisterAdminDto),
+      this.authController.registerAdmin
     );
     this.router.post(
       "/login",
