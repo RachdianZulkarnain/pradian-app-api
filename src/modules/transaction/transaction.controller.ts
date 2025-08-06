@@ -27,7 +27,6 @@ export class TransactionController {
       if (!paymentProof) throw new ApiError("paymentProof is required", 400);
 
       const authUserId = res.locals.user.id;
-     
 
       const result = await this.transactionService.uploadPaymentProof(
         req.params.uuid,
@@ -140,4 +139,22 @@ export class TransactionController {
       res.status(500).json({ message: "Internal server error" });
     }
   }
+
+  getUserTransactions = async (req: Request, res: Response) => {
+    const userId = res.locals.user?.id;
+    if (!userId) throw new ApiError("Unauthorized", 401);
+
+    const take = parseInt(req.query.take as string) || 10;
+    const page = parseInt(req.query.page as string) || 1;
+    const search = (req.query.search as string) || "";
+
+    const result = await this.transactionService.getUserTransactions({
+      userId,
+      page,
+      take,
+      search,
+    });
+
+    res.status(200).send(result);
+  };
 }

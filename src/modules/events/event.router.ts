@@ -54,6 +54,8 @@ export class EventRouter {
       this.eventController.editEvent
     );
 
+    this.router.get("/:slug/tickets", this.eventController.getTicketsByEvent);
+
     this.router.post(
       "/",
       this.jwtMiddleware.verifyToken(process.env.JWT_SECRET!),
@@ -69,6 +71,8 @@ export class EventRouter {
       this.eventController.createEvent
     );
   };
+
+  
 
   getRouter = () => {
     return this.router;

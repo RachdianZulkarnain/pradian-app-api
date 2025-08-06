@@ -58,45 +58,44 @@ export class EventService {
     };
   };
 
-getMyEvents = async ({
-  adminId,
-  take,
-  page,
-}: {
-  adminId: number;
-  take: number;
-  page: number;
-}) => {
-  const whereClause = {
-    deletedAt: null,
+  getMyEvents = async ({
     adminId,
-  };
-
-  const events = await this.prisma.event.findMany({
-    where: whereClause,
-    skip: (page - 1) * take,
     take,
-    include: {
-      tickets: {
-        select: {
-          price: true,
+    page,
+  }: {
+    adminId: number;
+    take: number;
+    page: number;
+  }) => {
+    const whereClause = {
+      deletedAt: null,
+      adminId,
+    };
+
+    const events = await this.prisma.event.findMany({
+      where: whereClause,
+      skip: (page - 1) * take,
+      take,
+      include: {
+        tickets: {
+          select: {
+            price: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  const total = await this.prisma.event.count({ where: whereClause });
+    const total = await this.prisma.event.count({ where: whereClause });
 
-  return {
-    data: events,
-    meta: {
-      page,
-      take,
-      total,
-    },
+    return {
+      data: events,
+      meta: {
+        page,
+        take,
+        total,
+      },
+    };
   };
-};
-
 
   updateEventStatus = async (
     eventId: number,
@@ -179,68 +178,67 @@ getMyEvents = async ({
   };
 
   editEvent = async (
-  slug: string,
-  body: Partial<CreateEventDTO>, // Use Partial to allow partial updates
-  thumbnail: Express.Multer.File | undefined,
-  authUserId: number
-) => {
-  const existing = await this.prisma.event.findFirst({
-    where: { slug },
-  });
+    slug: string,
+    body: Partial<CreateEventDTO>, // Use Partial to allow partial updates
+    thumbnail: Express.Multer.File | undefined,
+    authUserId: number
+  ) => {
+    const existing = await this.prisma.event.findFirst({
+      where: { slug },
+    });
 
-  if (!existing) {
-    throw new ApiError("Event not found", 404);
-  }
-
-  if (existing.adminId !== authUserId) {
-    throw new ApiError("Unauthorized to edit this event", 403);
-  }
-
-  let newThumbnail = existing.thumbnail;
-
-  if (thumbnail) {
-    if (existing.thumbnail) {
-      await this.cloudinaryService.remove(existing.thumbnail);
+    if (!existing) {
+      throw new ApiError("Event not found", 404);
     }
-    const { secure_url } = await this.cloudinaryService.upload(thumbnail);
-    newThumbnail = secure_url;
-  }
 
-  let startDate: Date | undefined = existing.startDate;
-  let endDate: Date | undefined = existing.endDate;
-
-  if (body.startDate) {
-    const parsedStart = new Date(body.startDate);
-    if (isNaN(parsedStart.getTime())) {
-      throw new ApiError("Invalid start date format", 400);
+    if (existing.adminId !== authUserId) {
+      throw new ApiError("Unauthorized to edit this event", 403);
     }
-    startDate = parsedStart;
-  }
 
-  if (body.endDate) {
-    const parsedEnd = new Date(body.endDate);
-    if (isNaN(parsedEnd.getTime())) {
-      throw new ApiError("Invalid end date format", 400);
+    let newThumbnail = existing.thumbnail;
+
+    if (thumbnail) {
+      if (existing.thumbnail) {
+        await this.cloudinaryService.remove(existing.thumbnail);
+      }
+      const { secure_url } = await this.cloudinaryService.upload(thumbnail);
+      newThumbnail = secure_url;
     }
-    endDate = parsedEnd;
-  }
 
-  const updated = await this.prisma.event.update({
-    where: { id: existing.id },
-    data: {
-      title: body.title ?? existing.title,
-      description: body.description ?? existing.description,
-      category: body.category ?? existing.category,
-      location: body.location ?? existing.location,
-      startDate,
-      endDate,
-      thumbnail: newThumbnail,
-    },
-  });
+    let startDate: Date | undefined = existing.startDate;
+    let endDate: Date | undefined = existing.endDate;
 
-  return { message: "Event updated successfully", updated };
-};
+    if (body.startDate) {
+      const parsedStart = new Date(body.startDate);
+      if (isNaN(parsedStart.getTime())) {
+        throw new ApiError("Invalid start date format", 400);
+      }
+      startDate = parsedStart;
+    }
 
+    if (body.endDate) {
+      const parsedEnd = new Date(body.endDate);
+      if (isNaN(parsedEnd.getTime())) {
+        throw new ApiError("Invalid end date format", 400);
+      }
+      endDate = parsedEnd;
+    }
+
+    const updated = await this.prisma.event.update({
+      where: { id: existing.id },
+      data: {
+        title: body.title ?? existing.title,
+        description: body.description ?? existing.description,
+        category: body.category ?? existing.category,
+        location: body.location ?? existing.location,
+        startDate,
+        endDate,
+        thumbnail: newThumbnail,
+      },
+    });
+
+    return { message: "Event updated successfully", updated };
+  };
 
   getShortEvents = async () => {
     const events = await this.prisma.event.findMany({
@@ -257,5 +255,39 @@ getMyEvents = async ({
     });
 
     return events;
+  };
+
+  getTicketsByEvent = async (slug: string) => {
+    const event = await this.prisma.event.findFirst({
+      where: {
+        slug,
+        deletedAt: null,
+      },
+    });
+
+    if (!event) {
+      throw new ApiError("Event not found", 404);
+    }
+
+    const tickets = await this.prisma.ticket.findMany({
+      where: {
+        eventId: event.id,
+      },
+      select: {
+        id: true,
+        title: true,
+        price: true,
+        stock: true,
+        description: true,
+        totalPrice: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+
+    return { data: tickets };
   };
 }
