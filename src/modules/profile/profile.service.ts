@@ -17,16 +17,27 @@ export class ProfileService {
   }
 
   getProfile = async (id: number) => {
-    const user = this.prisma.user.findUnique({
-      where: { id },
-    });
+  const user = await this.prisma.user.findUnique({
+    where: { id },
+    include: {
+      referralpoint: true,
+    },
+  });
 
-    if (!user) {
-      throw new ApiError("User not found", 404);
-    }
+  if (!user) {
+    throw new ApiError("User not found", 404);
+  }
 
-    return user;
+  const totalPoints = user.referralpoint?.reduce((sum, rp) => sum + rp.amount, 0) || 0;
+
+  const { password, ...userWithoutPassword } = user;
+
+  return {
+    ...userWithoutPassword,
+    referralPoints: totalPoints,
   };
+};
+
 
   updateProfile = async (
     id: number,
@@ -60,36 +71,38 @@ export class ProfileService {
     return { message: "Profile Updated" };
   };
 
- updateProfileAdmin = async (
-  id: number,
-  body: UpdateProfileDto,
-  pictureProfile?: Express.Multer.File
-) => {
-  const user = await this.prisma.user.findFirst({
-    where: { id },
-  });
+  updateProfileAdmin = async (
+    id: number,
+    body: UpdateProfileDto,
+    pictureProfile?: Express.Multer.File
+  ) => {
+    const user = await this.prisma.user.findFirst({
+      where: { id },
+    });
 
-  let updatedPicture = user?.pictureProfile;
+    let updatedPicture = user?.pictureProfile;
 
-  if (pictureProfile) {
-    if (user?.pictureProfile) {
-      await this.cloudinaryService.remove(user.pictureProfile);
+    if (pictureProfile) {
+      if (user?.pictureProfile) {
+        await this.cloudinaryService.remove(user.pictureProfile);
+      }
+
+      const { secure_url } = await this.cloudinaryService.upload(
+        pictureProfile
+      );
+      updatedPicture = secure_url;
     }
 
-    const { secure_url } = await this.cloudinaryService.upload(pictureProfile);
-    updatedPicture = secure_url;
-  }
+    await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...body,
+        pictureProfile: updatedPicture,
+      },
+    });
 
-  await this.prisma.user.update({
-    where: { id },
-    data: {
-      ...body,
-      pictureProfile: updatedPicture,
-    },
-  });
-
-  return { message: "Profile Updated" };
-};
+    return { message: "Profile Updated" };
+  };
 
   changePassword = async (body: ChangePasswordDto, id: number) => {
     const user = await this.prisma.user.findUnique({ where: { id } });

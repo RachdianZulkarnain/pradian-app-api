@@ -10,6 +10,7 @@ import { nanoid } from "nanoid";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
+import { RegisterAdminDto } from "./dto/register-admin.dto";
 
 export class AuthService {
   private prisma: PrismaService;
@@ -89,7 +90,7 @@ export class AuthService {
 
         await this.prisma.coupon.create({
           data: {
-            code: `WELCOME-${newUser.id}-${Date.now()}`,
+            code: `WELCOME-${newUser.name}-${Date.now()}`,
             userId: newUser.id,
             discount: 10000,
             expiresAt,
@@ -107,6 +108,39 @@ export class AuthService {
     }
 
     return newUser;
+  };
+
+  registerAdmin = async (body: RegisterAdminDto) => {
+    const user = await this.prisma.user.findFirst({
+      where: { email: body.email },
+    });
+
+    if (user) {
+      throw new ApiError("email already exist", 400);
+    }
+
+    const hashedPassword = await this.passwordService.hashPassword(
+      body.password
+    );
+
+    await this.mailService.sendMail(
+      body.email,
+      "Welcome Organizer!",
+      "welcome",
+      { name: body.name, year: new Date().getFullYear() }
+    );
+
+    const newAdmin = await this.prisma.user.create({
+      data: {
+        name: body.name,
+        email: body.email,
+        password: hashedPassword,
+        role: "ADMIN",
+      },
+      omit: { password: true },
+    });
+
+    return newAdmin;
   };
 
   login = async (body: LoginDto) => {

@@ -13,9 +13,20 @@ export class VoucherController {
   };
 
   getVouchersByEvent = async (req: Request, res: Response) => {
-    const eventId = Number(req.params.eventId);
-    const result = await this.voucherService.getVouchersByEvent(eventId);
-    res.status(200).send(result);
+    try {
+      const eventId = Number(req.params.eventId);
+
+      if (isNaN(eventId)) {
+        return res.status(400).json({ error: "Invalid event ID" });
+      }
+
+      const vouchers = await this.voucherService.getVouchersByEvent(eventId);
+
+      res.status(200).json({ data: vouchers });
+    } catch (error) {
+      console.error("Failed to fetch vouchers:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   };
 
   createVoucher = async (req: Request, res: Response) => {
