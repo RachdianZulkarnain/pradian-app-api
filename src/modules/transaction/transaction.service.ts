@@ -461,4 +461,43 @@ export class TransactionService {
       },
     };
   };
+
+  findByUUID = async (uuid: string) => {
+    return this.prisma.transaction.findFirst({
+      where: { uuid },
+    });
+  };
+
+  expireTransactionAndRestoreStock = async (uuid: string) => {
+    const transaction = await this.prisma.transaction.findUnique({
+      where: { uuid },
+      include: {
+        transactionDetail: true,
+      },
+    });
+
+    if (!transaction) throw new Error("Transaction not found");
+
+    if (transaction.status !== "WAITING_FOR_PAYMENT") return;
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.transaction.update({
+        where: { uuid },
+        data: {
+          status: "EXPIRED",
+          updatedAt: new Date(),
+        },
+      });
+
+      for (const detail of transaction.transactionDetail) {
+        await tx.ticket.update({
+          where: { id: detail.ticketId },
+          data: {
+            stock: { increment: detail.qty },
+          },
+        });
+      }
+    });
+  };
+  
 }
