@@ -14,7 +14,7 @@ export class TransactionQueue {
       { uuid: uuid }, // payload / isi data dalam antrian
       {
         jobId: uuid, // optional: mencegah duplikat
-        delay: 5 * 60 * 1000, // optional: delay 5 menit
+        delay: 60 * 1000, // optional: delay 5 menit
         attempts: 5, // optional: retry sampai 5x
         removeOnComplete: true, // optional ; hapus data setelah selesai
         backoff: { type: "exponential", delay: 1000 },

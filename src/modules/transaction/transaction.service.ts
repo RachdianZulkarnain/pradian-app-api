@@ -1,4 +1,4 @@
-import { Prisma } from "../../generated/prisma";
+import { Prisma, TransactionStatus } from "../../generated/prisma";
 import { ApiError } from "../../utils/api-error";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
 import { MailService } from "../mail/mail.service";
@@ -177,7 +177,7 @@ export class TransactionService {
       {
         name: result.user.name,
         uuid: result.uuid,
-        expireAt: new Date(result.createdAt.getTime() + 5 * 60 * 1000),
+        expireAt: new Date(result.createdAt.getTime() + 60 * 1000),
         year: new Date().getFullYear(),
       }
     );
@@ -195,8 +195,20 @@ export class TransactionService {
     });
 
     if (!transaction) throw new ApiError("Transaction not found!", 400);
-    if (transaction.userId !== authUserId)
+    if (transaction.userId !== authUserId) {
       throw new ApiError("Unauthorized", 401);
+    }
+
+    if (
+      !["WAITING_FOR_CONFIRMATION", "WAITING_FOR_PAYMENT"].includes(
+        transaction.status
+      )
+    ) {
+      throw new ApiError(
+        "Transaction status must be WAITING_FOR_CONFIRMATION or WAITING_FOR_PAYMENT",
+        400
+      );
+    }
 
     const { secure_url } = await this.cloudinaryService.upload(paymentProof);
 
@@ -499,5 +511,4 @@ export class TransactionService {
       }
     });
   };
-  
 }
