@@ -1,4 +1,3 @@
-// dto/upsert-bank-details.dto.ts
 import { IsString } from "class-validator";
 
 export class UpsertBankDetailsDTO {

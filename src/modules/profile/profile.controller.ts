@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { ProfileService } from "./profile.service";
-import { ApiError } from "../../utils/api-error";
 
 export class ProfileController {
   private profileService: ProfileService;

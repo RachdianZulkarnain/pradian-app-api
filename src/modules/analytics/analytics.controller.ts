@@ -1,4 +1,3 @@
-// src/modules/analytics/analytics.controller.ts
 import { Request, Response } from "express";
 import { ApiError } from "../../utils/api-error";
 import { AnalyticsService } from "./analytics.service";

@@ -1,16 +1,15 @@
-import Mail from "nodemailer/lib/mailer";
+import { nanoid } from "nanoid";
 import { ApiError } from "../../utils/api-error";
+import { CloudinaryService } from "../cloudinary/cloudinary.service";
 import { JwtService } from "../jwt/jwt.service";
 import { MailService } from "../mail/mail.service";
 import { PasswordService } from "../password/password.service";
 import { PrismaService } from "../prisma/prisma.service";
-import { LoginDto } from "./dto/login.dto";
-import { RegisterDto } from "./dto/register.dto";
-import { nanoid } from "nanoid";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
-import { ResetPasswordDto } from "./dto/reset-password.dto";
-import { CloudinaryService } from "../cloudinary/cloudinary.service";
+import { LoginDto } from "./dto/login.dto";
 import { RegisterAdminDto } from "./dto/register-admin.dto";
+import { RegisterDto } from "./dto/register.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 export class AuthService {
   private prisma: PrismaService;
@@ -41,7 +40,7 @@ export class AuthService {
 
     let referralCode: string;
     while (true) {
-      referralCode = nanoid(8); // e.g., "fj38djsh"
+      referralCode = nanoid(8);
       const exists = await this.prisma.user.findFirst({
         where: { referralCode },
       });
@@ -67,7 +66,6 @@ export class AuthService {
       "welcome",
       { name: body.name, year: new Date().getFullYear() }
     );
-    //
 
     const newUser = await this.prisma.user.create({
       data: {

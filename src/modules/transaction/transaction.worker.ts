@@ -1,8 +1,7 @@
-// src/modules/transactions/transaction.worker.ts
-import { connection } from "../../config/redis";
 import { Job, Worker } from "bullmq";
-import { PrismaService } from "../prisma/prisma.service";
+import { connection } from "../../config/redis";
 import { ApiError } from "../../utils/api-error";
+import { PrismaService } from "../prisma/prisma.service";
 
 export class TransactionWorker {
   private worker: Worker;
@@ -27,21 +26,17 @@ export class TransactionWorker {
       throw new ApiError("Invalid transaction UUID", 400);
     }
 
-    // Jika masih menunggu pembayaran, set ke EXPIRED dan rollback stock
     if (transaction.status === "WAITING_FOR_PAYMENT") {
       await this.prisma.$transaction(async (tx) => {
-        // Update status jadi EXPIRED
         await tx.transaction.update({
           where: { uuid },
           data: { status: "EXPIRED" },
         });
 
-        // Ambil detail transaksi
         const transactionDetails = await tx.transactionDetail.findMany({
           where: { transactionId: transaction.id },
         });
 
-        // Kembalikan stok tiket
         for (const detail of transactionDetails) {
           await tx.ticket.update({
             where: { id: detail.ticketId },

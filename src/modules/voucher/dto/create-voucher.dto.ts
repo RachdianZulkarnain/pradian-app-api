@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumberString } from "class-validator";
+import { IsNotEmpty, IsNumberString, IsString } from "class-validator";
 
 export class CreateVoucherDTO {
   @IsString()

@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { AuthController } from "./auth.controller";
-import { validateBody } from "../../middlewares/validation.middleware";
-import { RegisterDto } from "./dto/register.dto";
-import { LoginDto } from "./dto/login.dto";
-import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
-import { ForgotPasswordDto } from "./dto/forgot-password.dto";
-import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { JwtMiddleware } from "../../middlewares/jwt.middleware";
+import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
+import { validateBody } from "../../middlewares/validation.middleware";
+import { AuthController } from "./auth.controller";
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
+import { LoginDto } from "./dto/login.dto";
 import { RegisterAdminDto } from "./dto/register-admin.dto";
+import { RegisterDto } from "./dto/register.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 export class AuthRouter {
   private authController: AuthController;

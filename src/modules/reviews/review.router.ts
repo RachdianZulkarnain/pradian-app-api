@@ -1,7 +1,6 @@
-// review.router.ts
 import { Router } from "express";
-import { ReviewController } from "./review.controller";
 import { JwtMiddleware } from "../../middlewares/jwt.middleware";
+import { ReviewController } from "./review.controller";
 
 export class ReviewRouter {
   private router = Router();

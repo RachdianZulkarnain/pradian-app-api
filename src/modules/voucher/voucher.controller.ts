@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { VoucherService } from "./voucher.service";
 import { CreateVoucherDTO } from "./dto/create-voucher.dto";
 import { GetVouchersDTO } from "./dto/get-vouchers.dto";
+import { VoucherService } from "./voucher.service";
 
 export class VoucherController {
   private voucherService = new VoucherService();

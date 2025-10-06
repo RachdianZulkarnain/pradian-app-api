@@ -2,7 +2,6 @@ import { Prisma } from "../../generated/prisma";
 import { ApiError } from "../../utils/api-error";
 import { generateSlug } from "../../utils/generate-slug";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
-import { PaginationQueryParams } from "../pagination/dto/pagination.dto";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateEventDTO } from "./dto/create-event.dto";
 import { GetEventsDTO } from "./dto/get-events.dto";
@@ -179,7 +178,7 @@ export class EventService {
 
   editEvent = async (
     slug: string,
-    body: Partial<CreateEventDTO>, // Use Partial to allow partial updates
+    body: Partial<CreateEventDTO>,
     thumbnail: Express.Multer.File | undefined,
     authUserId: number
   ) => {

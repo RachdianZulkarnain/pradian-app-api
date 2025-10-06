@@ -4,5 +4,4 @@ export class UpdateDashboardProfileDto {
   @IsOptional()
   @IsString()
   name!: string;
-
 }

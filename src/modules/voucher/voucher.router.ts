@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { VoucherController } from "./voucher.controller";
 import { JwtMiddleware } from "../../middlewares/jwt.middleware";
+import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
 import { validateBody } from "../../middlewares/validation.middleware";
 import { CreateVoucherDTO } from "./dto/create-voucher.dto";
-import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
+import { VoucherController } from "./voucher.controller";
 
 const uploader = new UploaderMiddleware();
 const controller = new VoucherController();
@@ -26,7 +26,7 @@ export class VoucherRouter {
     );
 
     this.router.get("/event/:eventId", controller.getVouchersByEvent);
-    
+
     this.router.post(
       "/",
       jwt.verifyToken(process.env.JWT_SECRET!),

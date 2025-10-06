@@ -1,8 +1,8 @@
 import { plainToInstance } from "class-transformer";
 import { Request, Response } from "express";
+import { ApiError } from "../../utils/api-error";
 import { PaginationQueryParams } from "../pagination/dto/pagination.dto";
 import { EventService } from "./event.service";
-import { ApiError } from "../../utils/api-error";
 
 export class EventController {
   private eventService: EventService;
@@ -28,7 +28,7 @@ export class EventController {
   };
 
   updateEventStatus = async (req: Request, res: Response) => {
-    const eventId = req.body.id; // ✅ from body instead of params
+    const eventId = req.body.id;
     const status = req.body.status;
 
     if (!["ACTIVE", "DRAFT"].includes(status)) {
@@ -67,7 +67,7 @@ export class EventController {
 
   editEvent = async (req: Request, res: Response) => {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    const thumbnail = files?.thumbnail?.[0]; // optional in edit
+    const thumbnail = files?.thumbnail?.[0];
 
     const { slug } = req.params;
     const body = req.body;
@@ -96,6 +96,4 @@ export class EventController {
     const result = await this.eventService.getTicketsByEvent(slug);
     res.status(200).send(result);
   };
-
-  
 }

@@ -1,7 +1,6 @@
-// src/modules/bankDetails/bank-details.controller.ts
 import { Request, Response } from "express";
-import { BankDetailsService } from "./bank-details.service";
 import { ApiError } from "../../utils/api-error";
+import { BankDetailsService } from "./bank-details.service";
 
 export class BankDetailsController {
   private bankDetailsService: BankDetailsService;
@@ -10,7 +9,6 @@ export class BankDetailsController {
     this.bankDetailsService = new BankDetailsService();
   }
 
-  // GET /bank-details
   getBankDetails = async (req: Request, res: Response) => {
     const userId = res.locals.user?.id;
     if (!userId) throw new ApiError("Unauthorized", 401);
@@ -19,7 +17,6 @@ export class BankDetailsController {
     res.status(200).send(result || null);
   };
 
-  // POST /bank-details
   upsertBankDetails = async (req: Request, res: Response) => {
     const userId = res.locals.user?.id;
     if (!userId) throw new ApiError("Unauthorized", 401);

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { TicketService } from "./ticket.service";
 import { CreateTicketDTO } from "./dto/create-ticket.dto";
 import { GetTicketsDTO } from "./dto/get-tickets.dto";
+import { TicketService } from "./ticket.service";
 
 export class TicketController {
   private ticketService: TicketService;

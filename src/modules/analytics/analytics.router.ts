@@ -1,7 +1,6 @@
-// src/modules/analytics/analytics.router.ts
 import { Router } from "express";
-import { AnalyticsController } from "./analytics.controller";
 import { JwtMiddleware } from "../../middlewares/jwt.middleware";
+import { AnalyticsController } from "./analytics.controller";
 
 export class AnalyticsRouter {
   private router: Router;

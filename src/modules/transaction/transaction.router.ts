@@ -1,12 +1,11 @@
 import { Router } from "express";
 import { JwtMiddleware } from "../../middlewares/jwt.middleware";
-import { validateBody } from "../../middlewares/validation.middleware";
 import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
+import { validateBody } from "../../middlewares/validation.middleware";
 
-import { TransactionController } from "./transaction.controller";
 import { CreateTransactionDTO } from "./dto/create-transaction.dto";
 import { UpdateTransactionDTO } from "./dto/update-transaction.dto";
-import { GetAttendeesDTO } from "./dto/get-participants.dto";
+import { TransactionController } from "./transaction.controller";
 
 export class TransactionRouter {
   private router: Router;
@@ -89,8 +88,6 @@ export class TransactionRouter {
       this.transactionController.applyVoucher
     );
   };
-
-  
 
   public getRouter = () => {
     return this.router;

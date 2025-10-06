@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { EventController } from "./event.controller";
 import { JwtMiddleware } from "../../middlewares/jwt.middleware";
 import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
-import { CreateEventDTO } from "./dto/create-event.dto";
 import { validateBody } from "../../middlewares/validation.middleware";
+import { CreateEventDTO } from "./dto/create-event.dto";
+import { EventController } from "./event.controller";
 
 export class EventRouter {
   private router: Router;
@@ -50,7 +50,7 @@ export class EventRouter {
         "image/avif",
         "image/webp",
       ]),
-      validateBody(CreateEventDTO), // if you have a DTO validator for editing
+      validateBody(CreateEventDTO),
       this.eventController.editEvent
     );
 
@@ -71,8 +71,6 @@ export class EventRouter {
       this.eventController.createEvent
     );
   };
-
-  
 
   getRouter = () => {
     return this.router;

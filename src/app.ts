@@ -1,21 +1,21 @@
-import "reflect-metadata";
-import express, { Express } from "express";
 import cors from "cors";
+import express, { Express } from "express";
+import "reflect-metadata";
 
 import { PORT } from "./config/env";
 import { errorMiddleware } from "./middlewares/error.middleware";
 
+import { AnalyticsRouter } from "./modules/analytics/analytics.router";
 import { AuthRouter } from "./modules/auth/auth.router";
+import { BankDetailsRouter } from "./modules/bank-details/bank-details.router";
 import { EventRouter } from "./modules/events/event.router";
 import { ProfileRouter } from "./modules/profile/profile.router";
-import { TransactionRouter } from "./modules/transaction/transaction.router";
-import { TicketRouter } from "./modules/tickets/ticket.router";
-import { VoucherRouter } from "./modules/voucher/voucher.router";
-import { SettingsRouter } from "./settings/settings.router";
-import { AnalyticsRouter } from "./modules/analytics/analytics.router";
-import { initializeScheduler } from "./scripts";
-import { BankDetailsRouter } from "./modules/bank-details/bank-details.router";
 import { ReviewRouter } from "./modules/reviews/review.router";
+import { TicketRouter } from "./modules/tickets/ticket.router";
+import { TransactionRouter } from "./modules/transaction/transaction.router";
+import { VoucherRouter } from "./modules/voucher/voucher.router";
+import { initializeScheduler } from "./scripts";
+import { SettingsRouter } from "./settings/settings.router";
 import { initializeWorkers } from "./workers";
 
 export class App {
@@ -26,7 +26,7 @@ export class App {
     this.configureMiddleware();
     this.routes();
     this.handleError();
-    initializeScheduler(); // Optional: Scheduled jobs
+    initializeScheduler();
     initializeWorkers();
   }
 
@@ -61,7 +61,7 @@ export class App {
   }
 
   private handleError() {
-    this.app.use(errorMiddleware); // Global error handler
+    this.app.use(errorMiddleware);
   }
 
   public start() {

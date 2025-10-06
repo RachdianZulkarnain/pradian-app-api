@@ -5,7 +5,6 @@ import { ApiError } from "../utils/api-error";
 import { ChangeDashboardPasswordDto } from "./dto/change-password-dashboard.dto";
 import { UpdateDashboardProfileDto } from "./dto/update-profile-dashboard.dto";
 
-
 export class SettingsService {
   private prisma: PrismaService;
   private passwordService: PasswordService;

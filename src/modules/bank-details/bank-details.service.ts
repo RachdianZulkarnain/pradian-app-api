@@ -1,5 +1,3 @@
-// src/modules/bankDetails/bank-details.service.ts
-
 import { PrismaClient } from "../../generated/prisma";
 
 export class BankDetailsService {
@@ -14,7 +12,7 @@ export class BankDetailsService {
       where: { userId },
     });
 
-    return details; // could be null, handle in controller
+    return details;
   };
 
   upsertBankDetails = async (

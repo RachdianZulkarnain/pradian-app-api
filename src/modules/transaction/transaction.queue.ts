@@ -11,12 +11,12 @@ export class TransactionQueue {
     // fungsi untuk create antrian
     return await this.queue.add(
       "newTransaction",
-      { uuid: uuid }, // payload / isi data dalam antrian
+      { uuid: uuid },
       {
-        jobId: uuid, // optional: mencegah duplikat
-        delay: 60 * 1000, // optional: delay 5 menit
-        attempts: 5, // optional: retry sampai 5x
-        removeOnComplete: true, // optional ; hapus data setelah selesai
+        jobId: uuid,
+        delay: 60 * 1000,
+        attempts: 5,
+        removeOnComplete: true,
         backoff: { type: "exponential", delay: 1000 },
       }
     );

@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "../../generated/prisma";
+import { PrismaClient } from "../../generated/prisma";
 
 export class PrismaService extends PrismaClient {
   constructor() {

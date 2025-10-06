@@ -1,6 +1,6 @@
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ApiError } from "../utils/api-error";
 
 export const validateBody = (DtoClass: any) => {
@@ -13,7 +13,7 @@ export const validateBody = (DtoClass: any) => {
         .map((e) => Object.values(e.constraints || {}).join(", "))
         .join("; ");
 
-      console.log("[Validation Error]", req.body); 
+      console.log("[Validation Error]", req.body);
       throw new ApiError(message, 400);
     }
 

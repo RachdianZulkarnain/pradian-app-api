@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { TicketController } from "./ticket.controller";
 import { JwtMiddleware } from "../../middlewares/jwt.middleware";
+import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
 import { validateBody } from "../../middlewares/validation.middleware";
 import { CreateTicketDTO } from "./dto/create-ticket.dto";
-import { UploaderMiddleware } from "../../middlewares/uploader.middleware";
+import { TicketController } from "./ticket.controller";
 
 const uploader = new UploaderMiddleware();
 

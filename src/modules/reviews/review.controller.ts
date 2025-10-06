@@ -1,4 +1,3 @@
-// review.controller.ts
 import { Request, Response } from "express";
 import { ReviewService } from "./reviews.service";
 

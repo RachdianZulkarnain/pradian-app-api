@@ -1,8 +1,8 @@
-import { PrismaService } from "../prisma/prisma.service";
+import { Prisma } from "../../generated/prisma";
 import { ApiError } from "../../utils/api-error";
+import { PrismaService } from "../prisma/prisma.service";
 import { CreateTicketDTO } from "./dto/create-ticket.dto";
 import { GetTicketsDTO } from "./dto/get-tickets.dto";
-import { Prisma } from "../../generated/prisma";
 
 export class TicketService {
   private prisma: PrismaService;

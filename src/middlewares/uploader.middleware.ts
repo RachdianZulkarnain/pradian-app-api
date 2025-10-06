@@ -1,12 +1,12 @@
+import { NextFunction, Request, Response } from "express";
+import core, { fromBuffer } from "file-type/core";
 import multer from "multer";
 import { ApiError } from "../utils/api-error";
-import core, { fromBuffer } from "file-type/core";
-import { NextFunction, Request, Response } from "express";
 
 export class UploaderMiddleware {
   upload = () => {
     const storage = multer.memoryStorage();
-    const limits = { fileSize: 2 * 1024 * 1024 }; // 2MB
+    const limits = { fileSize: 2 * 1024 * 1024 };
 
     return multer({ storage, limits });
   };

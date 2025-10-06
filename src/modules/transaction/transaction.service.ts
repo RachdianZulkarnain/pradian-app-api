@@ -1,4 +1,4 @@
-import { Prisma, TransactionStatus } from "../../generated/prisma";
+import { Prisma } from "../../generated/prisma";
 import { ApiError } from "../../utils/api-error";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
 import { MailService } from "../mail/mail.service";
@@ -21,7 +21,6 @@ export class TransactionService {
     this.cloudinaryService = new CloudinaryService();
   }
 
-  // Get all transactions for the authenticated user
   getAdminTransactions = async ({
     adminId,
     take,
@@ -85,7 +84,6 @@ export class TransactionService {
     };
   };
 
-  // Get detailed transaction by UUID (only if it belongs to the user)
   getTransaction = async (uuid: string, authUserId: number) => {
     const transaction = await this.prisma.transaction.findFirst({
       where: {
@@ -241,7 +239,6 @@ export class TransactionService {
     }
 
     await this.prisma.$transaction(async (tx) => {
-      // Update status
       await tx.transaction.update({
         where: { uuid: body.uuid },
         data: {
@@ -250,7 +247,6 @@ export class TransactionService {
         },
       });
 
-      // Return ticket stock if rejected
       if (body.type === "REJECT") {
         const details = await tx.transactionDetail.findMany({
           where: { transactionId: transaction.id },
@@ -265,7 +261,6 @@ export class TransactionService {
       }
     });
 
-    // ✅ Send email to the user
     const template =
       body.type === "ACCEPT" ? "transaction-accepted" : "transaction-rejected";
     const subject =

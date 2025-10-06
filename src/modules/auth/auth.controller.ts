@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { AuthService } from "./auth.service";
-import { ApiError } from "../../utils/api-error";
 
 export class AuthController {
   private authService: AuthService;

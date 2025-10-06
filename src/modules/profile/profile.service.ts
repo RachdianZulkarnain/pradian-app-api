@@ -17,27 +17,27 @@ export class ProfileService {
   }
 
   getProfile = async (id: number) => {
-  const user = await this.prisma.user.findUnique({
-    where: { id },
-    include: {
-      referralpoint: true,
-    },
-  });
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        referralpoint: true,
+      },
+    });
 
-  if (!user) {
-    throw new ApiError("User not found", 404);
-  }
+    if (!user) {
+      throw new ApiError("User not found", 404);
+    }
 
-  const totalPoints = user.referralpoint?.reduce((sum, rp) => sum + rp.amount, 0) || 0;
+    const totalPoints =
+      user.referralpoint?.reduce((sum, rp) => sum + rp.amount, 0) || 0;
 
-  const { password, ...userWithoutPassword } = user;
+    const { password, ...userWithoutPassword } = user;
 
-  return {
-    ...userWithoutPassword,
-    referralPoints: totalPoints,
+    return {
+      ...userWithoutPassword,
+      referralPoints: totalPoints,
+    };
   };
-};
-
 
   updateProfile = async (
     id: number,

@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { JwtMiddleware } from "../middlewares/jwt.middleware";
 import { UploaderMiddleware } from "../middlewares/uploader.middleware";
-import { SettingsController } from "./settings.controller";
-import { UpdateDashboardProfileDto } from "./dto/update-profile-dashboard.dto";
 import { validateBody } from "../middlewares/validation.middleware";
 import { ChangeDashboardPasswordDto } from "./dto/change-password-dashboard.dto";
+import { UpdateDashboardProfileDto } from "./dto/update-profile-dashboard.dto";
+import { SettingsController } from "./settings.controller";
 
 export class SettingsRouter {
   private router: Router;

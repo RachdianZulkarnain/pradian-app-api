@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ApiError } from "../../utils/api-error";
 import { ProfileService } from "./organizer.service";
 
@@ -23,7 +23,7 @@ export class ProfileController {
       const result = await this.profileService.getOrganizerById(id);
       res.status(200).json(result);
     } catch (error) {
-      next(error); // penting untuk error middleware
+      next(error);
     }
   };
 }

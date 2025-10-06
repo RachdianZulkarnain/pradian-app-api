@@ -1,8 +1,7 @@
-// src/modules/bankDetails/bank-details.router.ts
 import { Router } from "express";
-import { BankDetailsController } from "./bank-details.controller";
 import { JwtMiddleware } from "../../middlewares/jwt.middleware";
 import { validateBody } from "../../middlewares/validation.middleware";
+import { BankDetailsController } from "./bank-details.controller";
 import { UpsertBankDetailsDTO } from "./dto/bank-details.dto";
 
 export class BankDetailsRouter {

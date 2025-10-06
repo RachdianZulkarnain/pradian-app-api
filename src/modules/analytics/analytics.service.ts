@@ -7,45 +7,47 @@ export class AnalyticsService {
   }
 
   getMonthlyAnalytics = async (adminId: number, year: number) => {
-  const transactions = await this.prismaService.transaction.findMany({
-    where: {
-      event: {
-        adminId,
-        deletedAt: null,
+    const transactions = await this.prismaService.transaction.findMany({
+      where: {
+        event: {
+          adminId,
+          deletedAt: null,
+        },
+        status: "PAID",
+        createdAt: {
+          gte: new Date(`${year}-01-01T00:00:00.000Z`),
+          lt: new Date(`${year + 1}-01-01T00:00:00.000Z`),
+        },
       },
-      status: "PAID",
-      createdAt: {
-        gte: new Date(`${year}-01-01T00:00:00.000Z`),
-        lt: new Date(`${year + 1}-01-01T00:00:00.000Z`),
+      include: {
+        transactionDetail: true,
       },
-    },
-    include: {
-      transactionDetail: true,
-    },
-  });
+    });
 
-  const monthlyTotals: Record<number, number> = Array.from({ length: 12 }, (_, i) => [i + 1, 0]).reduce((acc, [month]) => {
-    acc[month] = 0;
-    return acc;
-  }, {} as Record<number, number>);
+    const monthlyTotals: Record<number, number> = Array.from(
+      { length: 12 },
+      (_, i) => [i + 1, 0]
+    ).reduce((acc, [month]) => {
+      acc[month] = 0;
+      return acc;
+    }, {} as Record<number, number>);
 
-  for (const tx of transactions) {
-    const month = new Date(tx.createdAt).getMonth() + 1;
-    const revenue = tx.transactionDetail.reduce(
-      (sum, detail) => sum + detail.qty * detail.price,
-      0
-    );
-    monthlyTotals[month] += revenue;
-  }
+    for (const tx of transactions) {
+      const month = new Date(tx.createdAt).getMonth() + 1;
+      const revenue = tx.transactionDetail.reduce(
+        (sum, detail) => sum + detail.qty * detail.price,
+        0
+      );
+      monthlyTotals[month] += revenue;
+    }
 
-  return Array.from({ length: 12 }, (_, i) => ({
-    month: new Date(0, i).toLocaleString("en-US", { month: "short" }),
-    revenue: monthlyTotals[i + 1],
-  }));
-};
+    return Array.from({ length: 12 }, (_, i) => ({
+      month: new Date(0, i).toLocaleString("en-US", { month: "short" }),
+      revenue: monthlyTotals[i + 1],
+    }));
+  };
 
   getAdminAnalytics = async (adminId: number) => {
-    // Total Events
     const totalEvents = await this.prismaService.event.count({
       where: {
         adminId,
@@ -53,7 +55,6 @@ export class AnalyticsService {
       },
     });
 
-    // Total Tickets
     const totalTickets = await this.prismaService.ticket.count({
       where: {
         event: {
@@ -63,7 +64,6 @@ export class AnalyticsService {
       },
     });
 
-    // Total Vouchers
     const totalVouchers = await this.prismaService.voucher.count({
       where: {
         event: {
@@ -73,7 +73,6 @@ export class AnalyticsService {
       },
     });
 
-    // Total Revenue
     const transactions = await this.prismaService.transaction.findMany({
       where: {
         event: {

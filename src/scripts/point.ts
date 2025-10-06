@@ -23,7 +23,7 @@ export const pointSchedule = () => {
         });
       }
     } catch (error) {
-        console.error("failed to process referral point scheduler", error)
+      console.error("failed to process referral point scheduler", error);
     }
   });
 };
